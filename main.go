@@ -21,7 +21,7 @@ func main() {
 	router := gin.Default()
 	router.GET("/recipes", getRecipes)
 
-	router.Run("localhost:8080")
+	// router.Run("localhost:8080")
 
 	fmt.Println("Connecting...")
 	recDB := Connect()

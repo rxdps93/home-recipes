@@ -51,14 +51,31 @@ func DeleteTestRecipe(db *sql.DB, id int64) {
 }
 
 func AddTestRecipe(db *sql.DB) (int64, error) {
-	result, err := db.Exec("INSERT INTO recipe (name, description, instructions) VALUES (?, ?, ?)", "potato slop", "not very good", "eat|enjoy")
-	if err != nil {
-		return 0, fmt.Errorf("addTestRecipe: %v", err)
+	rec := RecipeFull{
+		name: "Grilled Cheese Sandwich",
+		desc: "A classic and simple sandwich",
+		inst: []string{
+			"Spread butter onto one side of each slice of bread",
+			"Put a skillet on the stove on medium/low heat.",
+			"Place one slice of bread into skillet, butter side down.",
+			"Place cheese on top of the bread in the skillet.",
+			"Place the remaining slice of bread on the cheese, butter side up.",
+			"Cover skillet and wait until bottom slice is golden brown.",
+			"Carefully flip and cover.",
+			"Once golden brown and cheese is adequately melted, the sandwich is ready.",
+		},
+		ingr: map[string]string{
+			"Bread":  "2 Slices",
+			"Cheese": "4 Slices",
+			"Butter": "0 x",
+		},
 	}
-	id, err := result.LastInsertId()
+
+	id, err := SubmitRecipe(db, rec)
 	if err != nil {
-		return 0, fmt.Errorf("addTestRecipe: %v", err)
+		return 0, err
 	}
+
 	return id, nil
 }
 
@@ -120,6 +137,91 @@ func QueryRecipeIngredientsByID(db *sql.DB, recID int64) ([]RecipeIngredientDB, 
 		return nil, fmt.Errorf("queryRecipeIngredientsByID %q: %v", recID, err)
 	}
 	return ings, nil
+}
+
+func SubmitRecipe(db *sql.DB, rec RecipeFull) (int64, error) {
+	recStmt, err := db.Prepare(
+		"INSERT INTO recipe (name, description, instructions) VALUES (?, ?, ?)")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ingStmt, err := db.Prepare("INSERT INTO ingredient (label) VALUES (?)")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	unitStmt, err := db.Prepare("INSERT INTO unit (label) VALUES (?)")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	riStmt, err := db.Prepare("INSERT INTO recipe_ingredient (recipe_id, ingredient_id, unit_id, quantity) VALUES (?, ?, ?, ?)")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	/*
+	 * For Recipe:
+	 * > name            -> rec.name
+	 * > description     -> rec.disc
+	 * > instructions    -> strings.join(rec.inst, "|")
+	 * exec recstmt with above, store rid
+	 * For Ingredient and Unit:
+	 * for each k,v in rec.ingr
+	 * ilabel = k
+	 * ulabel = strings.split(v, " ")[1]
+	 * quantity = strings.split(v, " ")[0]
+	 * exec ingstmt with ilabel, store iid
+	 * exec unitstmt with ulabel, store uid
+	 * exec ristmt with rid, iid, uid, quantity
+	 */
+	// RECIPE SECTION
+	result, err := recStmt.Exec(rec.name, rec.desc, strings.Join(rec.inst, "|"))
+	if err != nil {
+		return 0, fmt.Errorf("SubmitRecipe: %v", err)
+	}
+	recID, err := result.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("SubmitRecipe: %v", err)
+	}
+
+	// ING / UNIT SECTION
+	for k, v := range rec.ingr {
+		u := strings.Split(v, " ")
+
+		// INGREDIENT
+		result, err = ingStmt.Exec(k)
+		if err != nil {
+			return 0, fmt.Errorf("SubmitRecipe: %v", err)
+		}
+		ingID, err := result.LastInsertId()
+		if err != nil {
+			return 0, fmt.Errorf("SubmitRecipe: %v", err)
+		}
+
+		// UNIT
+		result, err = unitStmt.Exec(u[1])
+		if err != nil {
+			return 0, fmt.Errorf("SubmitRecipe: %v", err)
+		}
+		unitID, err := result.LastInsertId()
+		if err != nil {
+			return 0, fmt.Errorf("SubmitRecipe: %v", err)
+		}
+
+		// RECIPE_INGREDIENT
+		result, err = riStmt.Exec(recID, ingID, unitID, u[0])
+		if err != nil {
+			return 0, fmt.Errorf("SubmitRecipe: %v", err)
+		}
+		_, err = result.LastInsertId()
+		if err != nil {
+			return 0, fmt.Errorf("SubmitRecipe: %v", err)
+		}
+	}
+
+	return recID, nil
 }
 
 func GetRecipeByID(db *sql.DB, id int64) (RecipeFull, error) {
