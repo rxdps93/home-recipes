@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"sort"
 	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -43,8 +44,13 @@ func Connect() *sql.DB {
 	return DB
 }
 
-func DeleteTestRecipe(db *sql.DB, id int64) {
+func RemoveRecipe(db *sql.DB, id int64) {
 	_, err := db.Exec("DELETE FROM recipe WHERE recipe_id = ?", id)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.Exec("DELETE FROM recipe_ingredient WHERE recipe_id = ?", id)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -67,7 +73,7 @@ func AddTestRecipe(db *sql.DB) (int64, error) {
 		ingr: map[string]string{
 			"Bread":  "2 Slices",
 			"Cheese": "4 Slices",
-			"Butter": "0 x",
+			"Butter": "1 Pat",
 		},
 	}
 
@@ -105,6 +111,19 @@ func QueryIngredientTableByID(db *sql.DB, id int64) (IngredientDB, error) {
 	return ing, nil
 }
 
+func QueryIngredientTableByName(db *sql.DB, label string) (IngredientDB, error) {
+	var ing IngredientDB
+
+	row := db.QueryRow("SELECT * FROM ingredient WHERE label = ?", label)
+	if err := row.Scan(&ing.ID, &ing.Label); err != nil {
+		if err == sql.ErrNoRows {
+			return ing, fmt.Errorf("QueryIngredientTableByName %v: no such ingredient", label)
+		}
+		return ing, fmt.Errorf("QueryIngredientTableByName %v: %v", label, err)
+	}
+	return ing, nil
+}
+
 func QueryUnitTableByID(db *sql.DB, id int64) (UnitDB, error) {
 	var unit UnitDB
 
@@ -114,6 +133,19 @@ func QueryUnitTableByID(db *sql.DB, id int64) (UnitDB, error) {
 			return unit, fmt.Errorf("queryUnitTableByID %d: no such unit", id)
 		}
 		return unit, fmt.Errorf("queryUnitTableByID %d: %v", id, err)
+	}
+	return unit, nil
+}
+
+func QueryUnitTableByName(db *sql.DB, label string) (UnitDB, error) {
+	var unit UnitDB
+
+	row := db.QueryRow("SELECT * FROM unit WHERE label = ?", label)
+	if err := row.Scan(&unit.ID, &unit.Label); err != nil {
+		if err == sql.ErrNoRows {
+			return unit, fmt.Errorf("QueryUnitTableByName %v: no such unit", label)
+		}
+		return unit, fmt.Errorf("QueryUnitTableByName %v: %v", label, err)
 	}
 	return unit, nil
 }
@@ -136,27 +168,32 @@ func QueryRecipeIngredientsByID(db *sql.DB, recID int64) ([]RecipeIngredientDB, 
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("queryRecipeIngredientsByID %q: %v", recID, err)
 	}
+
+	sort.Slice(ings, func(ida, idb int) bool {
+		return ings[ida].ID < ings[idb].ID
+	})
+
 	return ings, nil
 }
 
 func SubmitRecipe(db *sql.DB, rec RecipeFull) (int64, error) {
 	recStmt, err := db.Prepare(
-		"INSERT INTO recipe (name, description, instructions) VALUES (?, ?, ?)")
+		"INSERT OR IGNORE INTO recipe (name, description, instructions) VALUES (?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ingStmt, err := db.Prepare("INSERT INTO ingredient (label) VALUES (?)")
+	ingStmt, err := db.Prepare("INSERT OR IGNORE INTO ingredient (label) VALUES (?)")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	unitStmt, err := db.Prepare("INSERT INTO unit (label) VALUES (?)")
+	unitStmt, err := db.Prepare("INSERT OR IGNORE INTO unit (label) VALUES (?)")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	riStmt, err := db.Prepare("INSERT INTO recipe_ingredient (recipe_id, ingredient_id, unit_id, quantity) VALUES (?, ?, ?, ?)")
+	riStmt, err := db.Prepare("INSERT OR IGNORE INTO recipe_ingredient (recipe_id, ingredient_id, unit_id, quantity) VALUES (?, ?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -186,29 +223,47 @@ func SubmitRecipe(db *sql.DB, rec RecipeFull) (int64, error) {
 		return 0, fmt.Errorf("SubmitRecipe: %v", err)
 	}
 
+	log.Printf("RECIPE ID: %v\n", recID)
+
 	// ING / UNIT SECTION
 	for k, v := range rec.ingr {
 		u := strings.Split(v, " ")
 
-		// INGREDIENT
-		result, err = ingStmt.Exec(k)
+		// INGREDIENT; check if exists, if not insert
+		var ingID int64
+		ingDB, err := QueryIngredientTableByName(db, k)
 		if err != nil {
-			return 0, fmt.Errorf("SubmitRecipe: %v", err)
-		}
-		ingID, err := result.LastInsertId()
-		if err != nil {
-			return 0, fmt.Errorf("SubmitRecipe: %v", err)
+			result, err = ingStmt.Exec(k)
+			if err != nil {
+				return 0, fmt.Errorf("SubmitRecipe: %v", err)
+			}
+			ingID, err = result.LastInsertId()
+			if err != nil {
+				return 0, fmt.Errorf("SubmitRecipe: %v", err)
+			}
+		} else {
+			ingID = ingDB.ID
 		}
 
-		// UNIT
-		result, err = unitStmt.Exec(u[1])
+		log.Printf("ING: %v; ID: %v\n", k, ingID)
+
+		// UNIT; check if exists, if not insert
+		var unitID int64
+		unitDB, err := QueryUnitTableByName(db, u[1])
 		if err != nil {
-			return 0, fmt.Errorf("SubmitRecipe: %v", err)
+			result, err = unitStmt.Exec(u[1])
+			if err != nil {
+				return 0, fmt.Errorf("SubmitRecipe: %v", err)
+			}
+			unitID, err = result.LastInsertId()
+			if err != nil {
+				return 0, fmt.Errorf("SubmitRecipe: %v", err)
+			}
+		} else {
+			unitID = unitDB.ID
 		}
-		unitID, err := result.LastInsertId()
-		if err != nil {
-			return 0, fmt.Errorf("SubmitRecipe: %v", err)
-		}
+
+		log.Printf("UNIT: %v; ID: %v\n", u[1], unitID)
 
 		// RECIPE_INGREDIENT
 		result, err = riStmt.Exec(recID, ingID, unitID, u[0])
@@ -219,6 +274,8 @@ func SubmitRecipe(db *sql.DB, rec RecipeFull) (int64, error) {
 		if err != nil {
 			return 0, fmt.Errorf("SubmitRecipe: %v", err)
 		}
+
+		log.Printf("\tri: %v; ing: %v; unit: %v; quantity: %v\n", recID, ingID, unitID, u[0])
 	}
 
 	return recID, nil
