@@ -9,12 +9,18 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type RecipeFull struct {
+type Ingredient struct {
+	label    string
+	quantity float64
+	unit     string
+}
+
+type Recipe struct {
 	id   int64
 	name string
 	desc string
 	inst []string
-	ingr map[string]string
+	ingr []Ingredient
 }
 
 func main() {
@@ -42,12 +48,12 @@ func main() {
 	RemoveRecipe(recDB, testId)
 }
 
-func printRecipe(rec RecipeFull) {
+func printRecipe(rec Recipe) {
 	fmt.Printf("Recipe Name:\n\t%v\n", rec.name)
 	fmt.Printf("Description:\n\t%v\n", rec.desc)
 	fmt.Printf("Ingredients:\n")
-	for ing, amt := range rec.ingr {
-		fmt.Printf("\t%v:\t%v\n", ing, amt)
+	for _, ing := range rec.ingr {
+		fmt.Printf("\t%v:\t%v %v\n", ing.label, ing.quantity, ing.unit)
 	}
 	fmt.Printf("Instructions:\n")
 	for i, step := range rec.inst {

@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"sort"
 	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -57,7 +56,7 @@ func RemoveRecipe(db *sql.DB, id int64) {
 }
 
 func AddTestRecipe(db *sql.DB) (int64, error) {
-	rec := RecipeFull{
+	rec := Recipe{
 		name: "Grilled Cheese Sandwich",
 		desc: "A classic and simple sandwich",
 		inst: []string{
@@ -70,10 +69,22 @@ func AddTestRecipe(db *sql.DB) (int64, error) {
 			"Carefully flip and cover.",
 			"Once golden brown and cheese is adequately melted, the sandwich is ready.",
 		},
-		ingr: map[string]string{
-			"Bread":  "2 Slices",
-			"Cheese": "4 Slices",
-			"Butter": "1 Pat",
+		ingr: []Ingredient{
+			{
+				label:    "Bread",
+				quantity: 2,
+				unit:     "Slices",
+			},
+			{
+				label:    "Cheese",
+				quantity: 4,
+				unit:     "Slices",
+			},
+			{
+				label:    "Butter",
+				quantity: 1,
+				unit:     "Pat",
+			},
 		},
 	}
 
@@ -169,14 +180,10 @@ func QueryRecipeIngredientsByID(db *sql.DB, recID int64) ([]RecipeIngredientDB, 
 		return nil, fmt.Errorf("queryRecipeIngredientsByID %q: %v", recID, err)
 	}
 
-	sort.Slice(ings, func(ida, idb int) bool {
-		return ings[ida].ID < ings[idb].ID
-	})
-
 	return ings, nil
 }
 
-func SubmitRecipe(db *sql.DB, rec RecipeFull) (int64, error) {
+func SubmitRecipe(db *sql.DB, rec Recipe) (int64, error) {
 	recStmt, err := db.Prepare(
 		"INSERT OR IGNORE INTO recipe (name, description, instructions) VALUES (?, ?, ?)")
 	if err != nil {
@@ -226,14 +233,13 @@ func SubmitRecipe(db *sql.DB, rec RecipeFull) (int64, error) {
 	log.Printf("RECIPE ID: %v\n", recID)
 
 	// ING / UNIT SECTION
-	for k, v := range rec.ingr {
-		u := strings.Split(v, " ")
+	for _, ing := range rec.ingr {
 
 		// INGREDIENT; check if exists, if not insert
 		var ingID int64
-		ingDB, err := QueryIngredientTableByName(db, k)
+		ingDB, err := QueryIngredientTableByName(db, ing.label)
 		if err != nil {
-			result, err = ingStmt.Exec(k)
+			result, err = ingStmt.Exec(ing.label)
 			if err != nil {
 				return 0, fmt.Errorf("SubmitRecipe: %v", err)
 			}
@@ -245,13 +251,13 @@ func SubmitRecipe(db *sql.DB, rec RecipeFull) (int64, error) {
 			ingID = ingDB.ID
 		}
 
-		log.Printf("ING: %v; ID: %v\n", k, ingID)
+		log.Printf("ING: %v; ID: %v\n", ing.label, ingID)
 
 		// UNIT; check if exists, if not insert
 		var unitID int64
-		unitDB, err := QueryUnitTableByName(db, u[1])
+		unitDB, err := QueryUnitTableByName(db, ing.unit)
 		if err != nil {
-			result, err = unitStmt.Exec(u[1])
+			result, err = unitStmt.Exec(ing.unit)
 			if err != nil {
 				return 0, fmt.Errorf("SubmitRecipe: %v", err)
 			}
@@ -263,10 +269,10 @@ func SubmitRecipe(db *sql.DB, rec RecipeFull) (int64, error) {
 			unitID = unitDB.ID
 		}
 
-		log.Printf("UNIT: %v; ID: %v\n", u[1], unitID)
+		log.Printf("UNIT: %v; ID: %v\n", ing.unit, unitID)
 
 		// RECIPE_INGREDIENT
-		result, err = riStmt.Exec(recID, ingID, unitID, u[0])
+		result, err = riStmt.Exec(recID, ingID, unitID, ing.quantity)
 		if err != nil {
 			return 0, fmt.Errorf("SubmitRecipe: %v", err)
 		}
@@ -275,14 +281,14 @@ func SubmitRecipe(db *sql.DB, rec RecipeFull) (int64, error) {
 			return 0, fmt.Errorf("SubmitRecipe: %v", err)
 		}
 
-		log.Printf("\tri: %v; ing: %v; unit: %v; quantity: %v\n", recID, ingID, unitID, u[0])
+		log.Printf("\tri: %v; ing: %v; unit: %v; quantity: %v\n", recID, ingID, unitID, ing.quantity)
 	}
 
 	return recID, nil
 }
 
-func GetRecipeByID(db *sql.DB, id int64) (RecipeFull, error) {
-	var rec RecipeFull
+func GetRecipeByID(db *sql.DB, id int64) (Recipe, error) {
+	var rec Recipe
 
 	recDB, err := QueryRecipeTableByID(db, id)
 	if err != nil {
@@ -298,7 +304,7 @@ func GetRecipeByID(db *sql.DB, id int64) (RecipeFull, error) {
 	rec.name = recDB.Name
 	rec.desc = recDB.Description
 	rec.inst = strings.Split(recDB.Instructions, "|")
-	rec.ingr = make(map[string]string)
+	rec.ingr = make([]Ingredient, 0)
 
 	for _, ri := range riDB {
 		unitDB, err := QueryUnitTableByID(db, ri.UnitID)
@@ -311,7 +317,11 @@ func GetRecipeByID(db *sql.DB, id int64) (RecipeFull, error) {
 			return rec, err
 		}
 
-		rec.ingr[ingDB.Label] = fmt.Sprintf("%v %v", ri.Quantity, unitDB.Label)
+		rec.ingr = append(rec.ingr, Ingredient{
+			label:    ingDB.Label,
+			quantity: ri.Quantity,
+			unit:     unitDB.Label,
+		})
 	}
 
 	return rec, nil
