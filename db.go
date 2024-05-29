@@ -55,12 +55,60 @@ func RemoveRecipe(db *sql.DB, id int64) {
 	}
 }
 
-func AddTestRecipe(db *sql.DB) (int64, error) {
+// FOR TESTING/DEVELOPMENT PURPOSES ONLY
+// TODO: REMOVE WHEN NO LONGER NEEDED
+func WipeDatabase(db *sql.DB) {
+	db.Exec("DELETE FROM recipe")
+	db.Exec("DELETE FROM ingredient")
+	db.Exec("DELETE FROM unit")
+	db.Exec("DELETE FROM recipe_ingredient")
+}
+
+func AddTestChocolateMilkshakeRecipe(db *sql.DB) (int64, error) {
 	rec := Recipe{
-		name: "Grilled Cheese Sandwich",
-		desc: "A classic and simple sandwich",
-		inst: []string{
-			"Spread butter onto one side of each slice of bread",
+		Name:        "Chocolate Milkshake",
+		Description: "A classic favorite cold dessert.",
+		Instructions: []string{
+			"Add ice cream to blender.",
+			"Pour milk into blender.",
+			"Add ovaltine to blender.",
+			"Blend until fully mixed.",
+			"To get desired consistency add ice cream to thicken or milk to thin.",
+			"To get desired flavor add ovaltine to taste.",
+		},
+		Ingredients: []Ingredient{
+			{
+				Label:    "Ice Cream",
+				Quantity: 4,
+				Unit:     "Scoops",
+			},
+			{
+				Label:    "Milk",
+				Quantity: 0.5,
+				Unit:     "Cups",
+			},
+			{
+				Label:    "Chocolate Malt Ovaltine",
+				Quantity: 4,
+				Unit:     "Tablespoons",
+			},
+		},
+	}
+
+	id, err := SubmitRecipe(db, rec)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
+}
+
+func AddTestGrilledCheeseRecipe(db *sql.DB) (int64, error) {
+	rec := Recipe{
+		Name:        "Grilled Cheese Sandwich",
+		Description: "A classic and simple sandwich.",
+		Instructions: []string{
+			"Spread butter onto one side of each slice of bread.",
 			"Put a skillet on the stove on medium/low heat.",
 			"Place one slice of bread into skillet, butter side down.",
 			"Place cheese on top of the bread in the skillet.",
@@ -69,21 +117,21 @@ func AddTestRecipe(db *sql.DB) (int64, error) {
 			"Carefully flip and cover.",
 			"Once golden brown and cheese is adequately melted, the sandwich is ready.",
 		},
-		ingr: []Ingredient{
+		Ingredients: []Ingredient{
 			{
-				label:    "Bread",
-				quantity: 2,
-				unit:     "Slices",
+				Label:    "Bread",
+				Quantity: 2,
+				Unit:     "Slices",
 			},
 			{
-				label:    "Cheese",
-				quantity: 4,
-				unit:     "Slices",
+				Label:    "Cheese",
+				Quantity: 4,
+				Unit:     "Slices",
 			},
 			{
-				label:    "Butter",
-				quantity: 1,
-				unit:     "Pat",
+				Label:    "Butter",
+				Quantity: 1,
+				Unit:     "Pat",
 			},
 		},
 	}
@@ -183,6 +231,36 @@ func QueryRecipeIngredientsByID(db *sql.DB, recID int64) ([]RecipeIngredientDB, 
 	return ings, nil
 }
 
+func GetAllRecipes(db *sql.DB) ([]Recipe, error) {
+	var recs []Recipe
+
+	rows, err := db.Query("SELECT recipe_id FROM recipe")
+	if err != nil {
+		return nil, fmt.Errorf("GetAllRecipes: %v", err)
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, fmt.Errorf("GetAllRecipes: %v", err)
+		}
+
+		rec, err := GetRecipeByID(db, id)
+		if err != nil {
+			return nil, fmt.Errorf("GetAllRecipes: GetRecipeByID %q: %v", id, err)
+		}
+
+		recs = append(recs, rec)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("GetAllRecipes: %v", err)
+	}
+
+	return recs, nil
+}
+
 func SubmitRecipe(db *sql.DB, rec Recipe) (int64, error) {
 	recStmt, err := db.Prepare(
 		"INSERT OR IGNORE INTO recipe (name, description, instructions) VALUES (?, ?, ?)")
@@ -221,7 +299,7 @@ func SubmitRecipe(db *sql.DB, rec Recipe) (int64, error) {
 	 * exec ristmt with rid, iid, uid, quantity
 	 */
 	// RECIPE SECTION
-	result, err := recStmt.Exec(rec.name, rec.desc, strings.Join(rec.inst, "|"))
+	result, err := recStmt.Exec(rec.Name, rec.Description, strings.Join(rec.Instructions, "|"))
 	if err != nil {
 		return 0, fmt.Errorf("SubmitRecipe: %v", err)
 	}
@@ -233,13 +311,13 @@ func SubmitRecipe(db *sql.DB, rec Recipe) (int64, error) {
 	log.Printf("RECIPE ID: %v\n", recID)
 
 	// ING / UNIT SECTION
-	for _, ing := range rec.ingr {
+	for _, ing := range rec.Ingredients {
 
 		// INGREDIENT; check if exists, if not insert
 		var ingID int64
-		ingDB, err := QueryIngredientTableByName(db, ing.label)
+		ingDB, err := QueryIngredientTableByName(db, ing.Label)
 		if err != nil {
-			result, err = ingStmt.Exec(ing.label)
+			result, err = ingStmt.Exec(ing.Label)
 			if err != nil {
 				return 0, fmt.Errorf("SubmitRecipe: %v", err)
 			}
@@ -251,13 +329,13 @@ func SubmitRecipe(db *sql.DB, rec Recipe) (int64, error) {
 			ingID = ingDB.ID
 		}
 
-		log.Printf("ING: %v; ID: %v\n", ing.label, ingID)
+		log.Printf("ING: %v; ID: %v\n", ing.Label, ingID)
 
 		// UNIT; check if exists, if not insert
 		var unitID int64
-		unitDB, err := QueryUnitTableByName(db, ing.unit)
+		unitDB, err := QueryUnitTableByName(db, ing.Unit)
 		if err != nil {
-			result, err = unitStmt.Exec(ing.unit)
+			result, err = unitStmt.Exec(ing.Unit)
 			if err != nil {
 				return 0, fmt.Errorf("SubmitRecipe: %v", err)
 			}
@@ -269,10 +347,10 @@ func SubmitRecipe(db *sql.DB, rec Recipe) (int64, error) {
 			unitID = unitDB.ID
 		}
 
-		log.Printf("UNIT: %v; ID: %v\n", ing.unit, unitID)
+		log.Printf("UNIT: %v; ID: %v\n", ing.Unit, unitID)
 
 		// RECIPE_INGREDIENT
-		result, err = riStmt.Exec(recID, ingID, unitID, ing.quantity)
+		result, err = riStmt.Exec(recID, ingID, unitID, ing.Quantity)
 		if err != nil {
 			return 0, fmt.Errorf("SubmitRecipe: %v", err)
 		}
@@ -281,7 +359,7 @@ func SubmitRecipe(db *sql.DB, rec Recipe) (int64, error) {
 			return 0, fmt.Errorf("SubmitRecipe: %v", err)
 		}
 
-		log.Printf("\tri: %v; ing: %v; unit: %v; quantity: %v\n", recID, ingID, unitID, ing.quantity)
+		log.Printf("\tri: %v; ing: %v; unit: %v; quantity: %v\n", recID, ingID, unitID, ing.Quantity)
 	}
 
 	return recID, nil
@@ -300,11 +378,11 @@ func GetRecipeByID(db *sql.DB, id int64) (Recipe, error) {
 		return rec, err
 	}
 
-	rec.id = id
-	rec.name = recDB.Name
-	rec.desc = recDB.Description
-	rec.inst = strings.Split(recDB.Instructions, "|")
-	rec.ingr = make([]Ingredient, 0)
+	rec.ID = id
+	rec.Name = recDB.Name
+	rec.Description = recDB.Description
+	rec.Instructions = strings.Split(recDB.Instructions, "|")
+	rec.Ingredients = make([]Ingredient, 0)
 
 	for _, ri := range riDB {
 		unitDB, err := QueryUnitTableByID(db, ri.UnitID)
@@ -317,10 +395,10 @@ func GetRecipeByID(db *sql.DB, id int64) (Recipe, error) {
 			return rec, err
 		}
 
-		rec.ingr = append(rec.ingr, Ingredient{
-			label:    ingDB.Label,
-			quantity: ri.Quantity,
-			unit:     unitDB.Label,
+		rec.Ingredients = append(rec.Ingredients, Ingredient{
+			Label:    ingDB.Label,
+			Quantity: ri.Quantity,
+			Unit:     unitDB.Label,
 		})
 	}
 
