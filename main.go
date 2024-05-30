@@ -1,12 +1,13 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
-	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -24,22 +25,30 @@ type Recipe struct {
 	Ingredients  []Ingredient `json:"ingredients"`
 }
 
-var recDB *sql.DB
-
 func main() {
-	router := gin.Default()
-	router.GET("/recipes", getRecipes)
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		cleanup()
+		os.Exit(1)
+	}()
+
+	// router := gin.Default()
+	// router.GET("/recipes", getRecipes)
+	http.HandleFunc("/", Home)
+	http.HandleFunc("/recipes", Recipes)
 
 	fmt.Println("Connecting...")
-	recDB = Connect()
+	Connect()
 	fmt.Println("Database opened")
 
-	_, err := AddTestGrilledCheeseRecipe(recDB)
+	_, err := AddTestGrilledCheeseRecipe()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	_, err = AddTestChocolateMilkshakeRecipe(recDB)
+	_, err = AddTestChocolateMilkshakeRecipe()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -59,9 +68,14 @@ func main() {
 	// }
 
 	// RemoveRecipe(recDB, testId)
-	router.Run("localhost:8080")
+	// router.Run("localhost:8080")
+	http.ListenAndServe(":8080", nil)
+}
 
-	WipeDatabase(recDB)
+func cleanup() {
+	log.Println("\nReceived Interrupt Event")
+	log.Println("Test data cleanup (wiping database)")
+	WipeDatabase()
 }
 
 func printRecipe(rec Recipe) {
@@ -77,11 +91,11 @@ func printRecipe(rec Recipe) {
 	}
 }
 
-func getRecipes(c *gin.Context) {
-	recs, err := GetAllRecipes(recDB)
-	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, err)
-	} else {
-		c.IndentedJSON(http.StatusOK, recs)
-	}
-}
+// func getRecipes(c *gin.Context) {
+// 	recs, err := GetAllRecipes(recDB)
+// if err != nil {
+// 	c.IndentedJSON(http.StatusInternalServerError, err)
+// } else {
+// 	c.IndentedJSON(http.StatusOK, recs)
+// 	}
+// }
