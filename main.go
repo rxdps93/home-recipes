@@ -34,8 +34,6 @@ func main() {
 		os.Exit(1)
 	}()
 
-	// router := gin.Default()
-	// router.GET("/recipes", getRecipes)
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /", Home)
 	mux.HandleFunc("GET /recipes", Recipes)
@@ -45,6 +43,12 @@ func main() {
 	Connect()
 	fmt.Println("Database opened")
 
+	populateTestData()
+
+	http.ListenAndServe(":8080", mux)
+}
+
+func populateTestData() {
 	_, err := AddTestGrilledCheeseRecipe()
 	if err != nil {
 		log.Fatal(err)
@@ -55,23 +59,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// rec, err := GetRecipeByID(recDB, ida)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// recs, err := GetAllRecipes(recDB)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// for _, rec := range recs {
-	// printRecipe(rec)
-	// }
-
-	// RemoveRecipe(recDB, testId)
-	// router.Run("localhost:8080")
-	http.ListenAndServe(":8080", mux)
+	_, err = AddTestFreshGuacamoleRecipe()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func cleanup() {
@@ -92,12 +83,3 @@ func printRecipe(rec Recipe) {
 		fmt.Printf("\t%v) %v\n", i, step)
 	}
 }
-
-// func getRecipes(c *gin.Context) {
-// 	recs, err := GetAllRecipes(recDB)
-// if err != nil {
-// 	c.IndentedJSON(http.StatusInternalServerError, err)
-// } else {
-// 	c.IndentedJSON(http.StatusOK, recs)
-// 	}
-// }

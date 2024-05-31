@@ -104,6 +104,53 @@ func AddTestChocolateMilkshakeRecipe() (int64, error) {
 	return id, nil
 }
 
+func AddTestFreshGuacamoleRecipe() (int64, error) {
+	rec := Recipe{
+		Name:        "Fresh Guacamole",
+		Description: "Delicious guacamole - great on chips!",
+		Instructions: []string{
+			"Cut the avocados in half, open them, and place the green innards in a bowl.",
+			"Mash the avocados.",
+			"Add lime juice; continue to mix.",
+			"Chop the cilantro, tomato, and onion; Add them to the avocado.",
+			"Add salt to taste and mix thoroughly.",
+		},
+		Ingredients: []Ingredient{
+			{
+				Label:    "Avocado",
+				Quantity: 4,
+				Unit:     "",
+			},
+			{
+				Label:    "Red Onion",
+				Quantity: 0.5,
+				Unit:     "",
+			},
+			{
+				Label:    "Tomato",
+				Quantity: 2,
+				Unit:     "",
+			},
+			{
+				Label:    "Cilantro",
+				Quantity: 2,
+				Unit:     "Tablespoons",
+			},
+			{
+				Label:    "Lime",
+				Quantity: 2,
+				Unit:     "",
+			},
+		},
+	}
+
+	id, err := SubmitRecipe(rec)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
 func AddTestGrilledCheeseRecipe() (int64, error) {
 	rec := Recipe{
 		Name:        "Grilled Cheese Sandwich",
