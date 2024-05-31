@@ -36,8 +36,10 @@ func main() {
 
 	// router := gin.Default()
 	// router.GET("/recipes", getRecipes)
-	http.HandleFunc("/", Home)
-	http.HandleFunc("/recipes", Recipes)
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /", Home)
+	mux.HandleFunc("GET /recipes", Recipes)
+	mux.HandleFunc("GET /recipes/{id}", RecipeDetail)
 
 	fmt.Println("Connecting...")
 	Connect()
@@ -69,7 +71,7 @@ func main() {
 
 	// RemoveRecipe(recDB, testId)
 	// router.Run("localhost:8080")
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8080", mux)
 }
 
 func cleanup() {
