@@ -34,7 +34,7 @@ type RecipeIngredientDB struct {
 	Quantity     float64 `json:"quantity"`
 }
 
-var db *sql.DB
+var db *sql.DB = nil
 
 func Connect() {
 	con, err := sql.Open("sqlite3", "recipes.db")
@@ -42,6 +42,14 @@ func Connect() {
 		log.Fatal(err)
 	}
 	db = con
+}
+
+func Disconnect() {
+	err := db.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	db = nil
 }
 
 func RemoveRecipeByID(id int64) {
@@ -356,8 +364,6 @@ func SubmitRecipe(rec Recipe) (int64, error) {
 		return 0, fmt.Errorf("SubmitRecipe: %v", err)
 	}
 
-	log.Printf("RECIPE ID: %v\n", recID)
-
 	// ING / UNIT SECTION
 	for _, ing := range rec.Ingredients {
 
@@ -377,8 +383,6 @@ func SubmitRecipe(rec Recipe) (int64, error) {
 			ingID = ingDB.ID
 		}
 
-		log.Printf("ING: %v; ID: %v\n", ing.Label, ingID)
-
 		// UNIT; check if exists, if not insert
 		var unitID int64
 		unitDB, err := queryUnitTableByName(ing.Unit)
@@ -395,8 +399,6 @@ func SubmitRecipe(rec Recipe) (int64, error) {
 			unitID = unitDB.ID
 		}
 
-		log.Printf("UNIT: %v; ID: %v\n", ing.Unit, unitID)
-
 		// RECIPE_INGREDIENT
 		result, err = riStmt.Exec(recID, ingID, unitID, ing.Quantity)
 		if err != nil {
@@ -406,8 +408,6 @@ func SubmitRecipe(rec Recipe) (int64, error) {
 		if err != nil {
 			return 0, fmt.Errorf("SubmitRecipe: %v", err)
 		}
-
-		log.Printf("\tri: %v; ing: %v; unit: %v; quantity: %v\n", recID, ingID, unitID, ing.Quantity)
 	}
 
 	return recID, nil

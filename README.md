@@ -6,3 +6,9 @@ I wanted to learn Go so this gives me an excuse to do so. Down the road I will b
 The go-sqlite3 dependency should be installed before doing `go run .` otherwise it hangs for a while. I don't particularly like how go handles modules/libraries so far.
 
 As of 5/30/2024: run `go run .` and navigate to localhost:8080 to see the progress
+
+Overview of files:
+* main.go - Contains the main function and some miscellaneous helper functions.
+* db.go - Contains all database related functions.
+* api.go - Contains the endpoint handler functions.
+* html.go - Contains functions which generate HTML for the endpoints to return.

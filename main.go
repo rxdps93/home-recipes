@@ -39,9 +39,9 @@ func main() {
 	mux.HandleFunc("GET /recipes", Recipes)
 	mux.HandleFunc("GET /recipes/{id}", RecipeDetail)
 
-	fmt.Println("Connecting...")
+	log.Println("Connecting...")
 	Connect()
-	fmt.Println("Database opened")
+	log.Println("Connected to Database")
 
 	populateTestData()
 
@@ -69,6 +69,7 @@ func cleanup() {
 	log.Println("\nReceived Interrupt Event")
 	log.Println("Test data cleanup (wiping database)")
 	WipeDatabase()
+	Disconnect()
 }
 
 func printRecipe(rec Recipe) {
