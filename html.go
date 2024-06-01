@@ -2,13 +2,21 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"strconv"
 
 	"github.com/chasefleming/elem-go"
 	"github.com/chasefleming/elem-go/attrs"
 )
+
+func generateErrorHTML(err error, msg string) elem.Node {
+	return elem.Body(nil,
+		elem.H1(nil,
+			elem.Text(msg),
+		),
+		elem.P(nil, elem.Text(err.Error())),
+	)
+}
 
 func GenerateHomeHTML() string {
 	head := elem.Head(nil, elem.Title(nil, elem.Text("Home")))
@@ -28,8 +36,9 @@ func GenerateRecipesHTML() string {
 
 	recs, err := GetAllRecipes()
 	if err != nil {
-		// TODO: handle this error case properly
-		log.Fatal(err)
+		body := generateErrorHTML(err, "Unable to load recipes; please try again later.")
+		html := elem.Html(nil, head, body)
+		return html.Render()
 	}
 	sort.Slice(recs, func(i, j int) bool {
 		return recs[i].Name < recs[j].Name
@@ -53,14 +62,18 @@ func GenerateRecipesHTML() string {
 func GenerateRecipeDetailHTML(id string) string {
 	recID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
-		// TODO: handle this error case properly
-		log.Fatal(err)
+		head := elem.Head(nil, elem.Title(nil, elem.Text("Error loading recipe")))
+		body := generateErrorHTML(err, "Malformed recipe ID.")
+		html := elem.Html(nil, head, body)
+		return html.Render()
 	}
 
 	rec, err := GetRecipeByID(recID)
 	if err != nil {
-		// TODO: handle this error case properly
-		log.Fatal(err)
+		head := elem.Head(nil, elem.Title(nil, elem.Text("Error loading recipe")))
+		body := generateErrorHTML(err, "Unable to load recipe.")
+		html := elem.Html(nil, head, body)
+		return html.Render()
 	}
 
 	head := elem.Head(nil, elem.Title(nil, elem.Text(rec.Name)))
