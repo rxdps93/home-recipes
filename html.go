@@ -53,12 +53,40 @@ func GenerateRecipesHTML() string {
 		return recs[i].Name < recs[j].Name
 	})
 
-	body := elem.Body(nil)
+	body := elem.Body(nil, elem.H1(nil, elem.Text("All Recipes:")))
 	for _, rec := range recs {
 		body.Children = append(body.Children,
-			elem.H1(nil,
+			elem.H2(nil,
 				elem.A(attrs.Props{attrs.Href: fmt.Sprintf("/recipes/%v", rec.ID)},
 					elem.Text(rec.Name)),
+			),
+		)
+	}
+
+	html := elem.Html(nil, head, body)
+
+	return html.Render()
+}
+
+func GenerateTagsHTML() string {
+	head := generateHeadNode("Tags", "View All Tags")
+
+	tags, err := GetAllTags()
+	if err != nil {
+		body := generateErrorNode(err, "Unable to load tags; please try again later.")
+		html := elem.Html(nil, head, body)
+		return html.Render()
+	}
+	sort.Slice(tags, func(i, j int) bool {
+		return tags[i] < tags[j]
+	})
+
+	body := elem.Body(nil, elem.H1(nil, elem.Text("All Tags:")))
+	for _, tag := range tags {
+		body.Children = append(body.Children,
+			elem.H2(nil,
+				elem.A(attrs.Props{attrs.Href: fmt.Sprintf("/tags/%v", tag)},
+					elem.Text(tag)),
 			),
 		)
 	}
@@ -101,6 +129,16 @@ func GenerateRecipeDetailHTML(id string) string {
 		)
 	}
 
+	tags := elem.Ul(nil)
+	for _, tag := range rec.Tags {
+		tags.Children = append(tags.Children,
+			elem.Li(nil,
+				elem.A(attrs.Props{attrs.Href: fmt.Sprintf("/tags/%v", tag)},
+					elem.Text(tag)),
+			),
+		)
+	}
+
 	body := elem.Body(nil,
 		elem.Header(nil, elem.H1(nil, elem.Text(rec.Name))),
 		elem.P(nil, elem.Text(rec.Description)),
@@ -109,8 +147,43 @@ func GenerateRecipeDetailHTML(id string) string {
 			ings,
 			elem.H2(nil, elem.Text("Instructions")),
 			instr,
+			elem.H3(nil, elem.Text("Tags")),
+			tags,
 		),
 	)
+
+	html := elem.Html(nil, head, body)
+
+	return html.Render()
+}
+
+func GenerateRecipesByTagHTML(tag string) string {
+	recs, err := GetAllRecipesForTagName(tag)
+	if err != nil {
+		head := elem.Head(nil, elem.Title(nil, elem.Text("Error loading recipes")))
+		body := generateErrorNode(err, "Unable to load recipes")
+		html := elem.Html(nil, head, body)
+		return html.Render()
+	}
+
+	head := generateHeadNode(fmt.Sprintf("Recipes By Tag: %v", tag), fmt.Sprintf("Recipes Tagged As %v", tag))
+
+	sort.Slice(recs, func(i, j int) bool {
+		return recs[i].Name < recs[j].Name
+	})
+
+	tags := elem.Ul(nil)
+	for _, rec := range recs {
+		tags.Children = append(tags.Children,
+			elem.H2(nil,
+				elem.A(attrs.Props{attrs.Href: fmt.Sprintf("/recipes/%v", rec.ID)},
+					elem.Text(rec.Name)),
+			),
+		)
+	}
+
+	body := elem.Body(nil, elem.H1(nil,
+		elem.Text(fmt.Sprintf("Recipes Tagged As %v:", tag)), tags))
 
 	html := elem.Html(nil, head, body)
 

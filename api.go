@@ -37,3 +37,26 @@ func RecipeDetail(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
 }
+
+func Tags(w http.ResponseWriter, req *http.Request) {
+	if req.Method == http.MethodGet {
+		content := GenerateTagsHTML()
+		w.Header().Set("Content-Type", "text/html")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(content))
+	} else {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func RecipesByTag(w http.ResponseWriter, req *http.Request) {
+	if req.Method == http.MethodGet {
+		tag := req.PathValue("tag")
+		content := GenerateRecipesByTagHTML(tag)
+		w.Header().Set("Content-Type", "text/html")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(content))
+	} else {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}

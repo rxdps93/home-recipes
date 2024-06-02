@@ -23,6 +23,7 @@ type Recipe struct {
 	Description  string       `json:"description"`
 	Instructions []string     `json:"instructions"`
 	Ingredients  []Ingredient `json:"ingredients"`
+	Tags         []string     `json:"tags"`
 }
 
 func main() {
@@ -38,6 +39,8 @@ func main() {
 	mux.HandleFunc("GET /", Home)
 	mux.HandleFunc("GET /recipes", Recipes)
 	mux.HandleFunc("GET /recipes/{id}", RecipeDetail)
+	mux.HandleFunc("GET /tags", Tags)
+	mux.HandleFunc("GET /tags/{tag}", RecipesByTag)
 
 	log.Println("Connecting...")
 	Connect()
@@ -82,5 +85,9 @@ func printRecipe(rec Recipe) {
 	fmt.Printf("Instructions:\n")
 	for i, step := range rec.Instructions {
 		fmt.Printf("\t%v) %v\n", i, step)
+	}
+	fmt.Printf("Tags:\n")
+	for _, tag := range rec.Tags {
+		fmt.Printf("\t%v\n", tag)
 	}
 }

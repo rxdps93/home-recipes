@@ -26,12 +26,23 @@ type UnitDB struct {
 	Label string `json:"label"`
 }
 
+type TagDB struct {
+	ID    int64  `json:"tag_id"`
+	Label string `json:"label"`
+}
+
 type RecipeIngredientDB struct {
 	ID           int64   `json:"rec_ing_id"`
 	RecipeID     int64   `json:"recipe_id"`
 	IngredientID int64   `json:"ingredient_id"`
 	UnitID       int64   `json:"unit_id"`
 	Quantity     float64 `json:"quantity"`
+}
+
+type RecipeTagDB struct {
+	ID       int64 `json:"rec_tag_id"`
+	RecipeID int64 `json:"recipe_id"`
+	TagID    int64 `json:"tag_id"`
 }
 
 var db *sql.DB = nil
@@ -71,6 +82,8 @@ func WipeDatabase() {
 	db.Exec("DELETE FROM ingredient")
 	db.Exec("DELETE FROM unit")
 	db.Exec("DELETE FROM recipe_ingredient")
+	db.Exec("DELETE FROM tag")
+	db.Exec("DELETE FROM recipe_tag")
 }
 
 func AddTestChocolateMilkshakeRecipe() (int64, error) {
@@ -101,6 +114,11 @@ func AddTestChocolateMilkshakeRecipe() (int64, error) {
 				Quantity: 4,
 				Unit:     "Tablespoons",
 			},
+		},
+		Tags: []string{
+			"Dessert",
+			"Drink",
+			"Comfort Food",
 		},
 	}
 
@@ -150,6 +168,10 @@ func AddTestFreshGuacamoleRecipe() (int64, error) {
 				Unit:     "",
 			},
 		},
+		Tags: []string{
+			"Dip",
+			"Mexican",
+		},
 	}
 
 	id, err := SubmitRecipe(rec)
@@ -189,6 +211,11 @@ func AddTestGrilledCheeseRecipe() (int64, error) {
 				Quantity: 1,
 				Unit:     "Pat",
 			},
+		},
+		Tags: []string{
+			"Sandwich",
+			"Lunch",
+			"Comfort Food",
 		},
 	}
 
@@ -265,7 +292,31 @@ func queryUnitTableByName(label string) (UnitDB, error) {
 	return unit, nil
 }
 
-func queryRecipeIngredientsByID(recID int64) ([]RecipeIngredientDB, error) {
+func queryTagTableByID(id int64) (TagDB, error) {
+	var tag TagDB
+	row := db.QueryRow("SELECT * FROM tag WHERE tag_id = ?", id)
+	if err := row.Scan(&tag.ID, &tag.Label); err != nil {
+		if err == sql.ErrNoRows {
+			return tag, fmt.Errorf("queryTagTableByID %d: no such tag", id)
+		}
+		return tag, fmt.Errorf("queryTagTableByID: %d: %v", id, err)
+	}
+	return tag, nil
+}
+
+func queryTagTableByName(label string) (TagDB, error) {
+	var tag TagDB
+	row := db.QueryRow("SELECT * FROM tag WHERE label = ?", label)
+	if err := row.Scan(&tag.ID, &tag.Label); err != nil {
+		if err == sql.ErrNoRows {
+			return tag, fmt.Errorf("queryTagTableByName: %v: no such tag", label)
+		}
+		return tag, fmt.Errorf("queryTagTableByName %v: %v", label, err)
+	}
+	return tag, nil
+}
+
+func queryRecipeIngredientsByRecipeID(recID int64) ([]RecipeIngredientDB, error) {
 	var ings []RecipeIngredientDB
 
 	rows, err := db.Query("SELECT * FROM recipe_ingredient WHERE recipe_id = ?", recID)
@@ -285,6 +336,75 @@ func queryRecipeIngredientsByID(recID int64) ([]RecipeIngredientDB, error) {
 	}
 
 	return ings, nil
+}
+
+func queryRecipeTagByRecipeID(recID int64) ([]RecipeTagDB, error) {
+	var tags []RecipeTagDB
+
+	rows, err := db.Query("SELECT * FROM recipe_tag WHERE recipe_id = ?", recID)
+	if err != nil {
+		return nil, fmt.Errorf("queryRecipeTagByRecipeID %q: %v", recID, err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var rt RecipeTagDB
+		if err := rows.Scan(&rt.ID, &rt.RecipeID, &rt.TagID); err != nil {
+			return nil, fmt.Errorf("queryRecipeTagByRecipeID", recID, err)
+		}
+		tags = append(tags, rt)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("queryRecipeTagByRecipeID %q: %v", recID, err)
+	}
+
+	return tags, nil
+}
+
+func queryRecipeTagByTagID(tagID int64) ([]RecipeTagDB, error) {
+	var tags []RecipeTagDB
+
+	rows, err := db.Query("SELECT * FROM recipe_tag WHERE tag_id = ?", tagID)
+	if err != nil {
+		return nil, fmt.Errorf("queryRecipeTagByTagID %q: %v", tagID, err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var rt RecipeTagDB
+		if err := rows.Scan(&rt.ID, &rt.RecipeID, &rt.TagID); err != nil {
+			return nil, fmt.Errorf("queryRecipeTagByTagID", tagID, err)
+		}
+		tags = append(tags, rt)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("queryRecipeTagByTagID %q: %v", tagID, err)
+	}
+
+	return tags, nil
+}
+
+func GetAllTags() ([]string, error) {
+	var tags []string
+
+	rows, err := db.Query("SELECT label FROM tag")
+	if err != nil {
+		return nil, fmt.Errorf("GetAllTags: %v", err)
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var tag string
+		if err := rows.Scan(&tag); err != nil {
+			return nil, fmt.Errorf("GetAllTags: %v", err)
+		}
+
+		tags = append(tags, tag)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("GetAllTags: %v", err)
+	}
+
+	return tags, nil
 }
 
 func GetAllRecipes() ([]Recipe, error) {
@@ -339,6 +459,16 @@ func SubmitRecipe(rec Recipe) (int64, error) {
 		log.Fatal(err)
 	}
 
+	tagStmt, err := db.Prepare("INSERT OR IGNORE INTO tag (label) VALUES (?)")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rtStmt, err := db.Prepare("INSERT OR IGNORE INTO recipe_tag (recipe_id, tag_id) VALUES (?, ?)")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	/*
 	 * For Recipe:
 	 * > name            -> rec.name
@@ -353,6 +483,7 @@ func SubmitRecipe(rec Recipe) (int64, error) {
 	 * exec ingstmt with ilabel, store iid
 	 * exec unitstmt with ulabel, store uid
 	 * exec ristmt with rid, iid, uid, quantity
+	 * Repeat similar process for tags
 	 */
 	// RECIPE SECTION
 	result, err := recStmt.Exec(rec.Name, rec.Description, strings.Join(rec.Instructions, "|"))
@@ -362,6 +493,34 @@ func SubmitRecipe(rec Recipe) (int64, error) {
 	recID, err := result.LastInsertId()
 	if err != nil {
 		return 0, fmt.Errorf("SubmitRecipe: %v", err)
+	}
+
+	// TAG SECTION
+	for _, tag := range rec.Tags {
+		// TAG; check if exists, if not insert
+		var tagID int64
+		tagDB, err := queryTagTableByName(tag)
+		if err != nil {
+			result, err = tagStmt.Exec(tag)
+			if err != nil {
+				return 0, fmt.Errorf("SubmitRecipe: %v", err)
+			}
+			tagID, err = result.LastInsertId()
+			if err != nil {
+				return 0, fmt.Errorf("SubmitRecipe: %v", err)
+			}
+		} else {
+			tagID = tagDB.ID
+		}
+
+		result, err = rtStmt.Exec(recID, tagID)
+		if err != nil {
+			return 0, fmt.Errorf("SubmitRecipe: %v", err)
+		}
+		_, err = result.LastInsertId()
+		if err != nil {
+			return 0, fmt.Errorf("SubmitRecipe: %v", err)
+		}
 	}
 
 	// ING / UNIT SECTION
@@ -421,7 +580,12 @@ func GetRecipeByID(id int64) (Recipe, error) {
 		return rec, err
 	}
 
-	riDB, err := queryRecipeIngredientsByID(id)
+	riDB, err := queryRecipeIngredientsByRecipeID(id)
+	if err != nil {
+		return rec, err
+	}
+
+	rtDB, err := queryRecipeTagByRecipeID(id)
 	if err != nil {
 		return rec, err
 	}
@@ -431,6 +595,7 @@ func GetRecipeByID(id int64) (Recipe, error) {
 	rec.Description = recDB.Description
 	rec.Instructions = strings.Split(recDB.Instructions, "|")
 	rec.Ingredients = make([]Ingredient, 0)
+	rec.Tags = make([]string, 0)
 
 	for _, ri := range riDB {
 		unitDB, err := queryUnitTableByID(ri.UnitID)
@@ -450,5 +615,39 @@ func GetRecipeByID(id int64) (Recipe, error) {
 		})
 	}
 
+	for _, rt := range rtDB {
+		tagDB, err := queryTagTableByID(rt.TagID)
+		if err != nil {
+			return rec, err
+		}
+
+		rec.Tags = append(rec.Tags, tagDB.Label)
+	}
+
 	return rec, nil
+}
+
+func GetAllRecipesForTagName(tag string) ([]Recipe, error) {
+	var recs []Recipe
+
+	tagDB, err := queryTagTableByName(tag)
+	if err != nil {
+		return nil, err
+	}
+
+	rts, err := queryRecipeTagByTagID(tagDB.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, rt := range rts {
+		rec, err := GetRecipeByID(rt.RecipeID)
+		if err != nil {
+			return nil, err
+		}
+
+		recs = append(recs, rec)
+	}
+
+	return recs, nil
 }
