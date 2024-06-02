@@ -9,7 +9,7 @@ import (
 	"github.com/chasefleming/elem-go/attrs"
 )
 
-func generateErrorHTML(err error, msg string) elem.Node {
+func generateErrorNode(err error, msg string) elem.Node {
 	return elem.Body(nil,
 		elem.H1(nil,
 			elem.Text(msg),
@@ -18,8 +18,17 @@ func generateErrorHTML(err error, msg string) elem.Node {
 	)
 }
 
+func generateHeadNode(title string, description string) elem.Node {
+	return elem.Head(nil,
+		elem.Title(nil, elem.Text(title)),
+		elem.Meta(attrs.Props{attrs.Charset: "utf-8"}),
+		elem.Meta(attrs.Props{attrs.Name: "description", attrs.Content: description}),
+		elem.Meta(attrs.Props{attrs.Name: "viewport", attrs.Content: "width=device-width, initial-scale=1"}),
+	)
+}
+
 func GenerateHomeHTML() string {
-	head := elem.Head(nil, elem.Title(nil, elem.Text("Home")))
+	head := generateHeadNode("Home", "Home Description")
 
 	body := elem.Div(nil,
 		elem.H1(nil, elem.Text("Test Homepage")),
@@ -32,11 +41,11 @@ func GenerateHomeHTML() string {
 }
 
 func GenerateRecipesHTML() string {
-	head := elem.Head(nil, elem.Title(nil, elem.Text("Recipes")))
+	head := generateHeadNode("Recipes", "View All Recipes")
 
 	recs, err := GetAllRecipes()
 	if err != nil {
-		body := generateErrorHTML(err, "Unable to load recipes; please try again later.")
+		body := generateErrorNode(err, "Unable to load recipes; please try again later.")
 		html := elem.Html(nil, head, body)
 		return html.Render()
 	}
@@ -63,7 +72,7 @@ func GenerateRecipeDetailHTML(id string) string {
 	recID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		head := elem.Head(nil, elem.Title(nil, elem.Text("Error loading recipe")))
-		body := generateErrorHTML(err, "Malformed recipe ID.")
+		body := generateErrorNode(err, "Malformed recipe ID.")
 		html := elem.Html(nil, head, body)
 		return html.Render()
 	}
@@ -71,12 +80,12 @@ func GenerateRecipeDetailHTML(id string) string {
 	rec, err := GetRecipeByID(recID)
 	if err != nil {
 		head := elem.Head(nil, elem.Title(nil, elem.Text("Error loading recipe")))
-		body := generateErrorHTML(err, "Unable to load recipe.")
+		body := generateErrorNode(err, "Unable to load recipe.")
 		html := elem.Html(nil, head, body)
 		return html.Render()
 	}
 
-	head := elem.Head(nil, elem.Title(nil, elem.Text(rec.Name)))
+	head := generateHeadNode(rec.Name, rec.Description)
 
 	ings := elem.Ul(nil)
 	for _, ing := range rec.Ingredients {
