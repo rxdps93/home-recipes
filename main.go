@@ -41,6 +41,7 @@ func main() {
 	mux.HandleFunc("GET /recipes/{id}", RecipeDetail)
 	mux.HandleFunc("GET /tags", Tags)
 	mux.HandleFunc("GET /tags/{tag}", RecipesByTag)
+	mux.HandleFunc("GET /test", Test)
 
 	log.Println("Connecting...")
 	Connect()
