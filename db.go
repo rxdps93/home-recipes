@@ -14,6 +14,7 @@ type RecipeDB struct {
 	Name         string `json:"name"`
 	Description  string `json:"description"`
 	Instructions string `json:"instructions"`
+	Source       string `json:"source"`
 }
 
 type IngredientDB struct {
@@ -119,7 +120,9 @@ func AddTestChocolateMilkshakeRecipe() (int64, error) {
 			"Dessert",
 			"Drink",
 			"Comfort Food",
+			"Family Recipe",
 		},
+		Source: "My Mom",
 	}
 
 	id, err := SubmitRecipe(rec)
@@ -171,7 +174,9 @@ func AddTestFreshGuacamoleRecipe() (int64, error) {
 		Tags: []string{
 			"Dip",
 			"Mexican",
+			"From Website",
 		},
+		Source: "https://based.cooking/guacamole/",
 	}
 
 	id, err := SubmitRecipe(rec)
@@ -216,7 +221,9 @@ func AddTestGrilledCheeseRecipe() (int64, error) {
 			"Sandwich",
 			"Lunch",
 			"Comfort Food",
+			"Family Recipe",
 		},
+		Source: "Me",
 	}
 
 	id, err := SubmitRecipe(rec)
@@ -231,7 +238,7 @@ func queryRecipeTableByID(id int64) (RecipeDB, error) {
 	var rec RecipeDB
 
 	row := db.QueryRow("SELECT * FROM recipe WHERE recipe_id = ?", id)
-	if err := row.Scan(&rec.ID, &rec.Name, &rec.Description, &rec.Instructions); err != nil {
+	if err := row.Scan(&rec.ID, &rec.Name, &rec.Description, &rec.Instructions, &rec.Source); err != nil {
 		if err == sql.ErrNoRows {
 			return rec, fmt.Errorf("queryRecipeTableByID %d: no such recipe", id)
 		}
@@ -439,7 +446,7 @@ func GetAllRecipes() ([]Recipe, error) {
 
 func SubmitRecipe(rec Recipe) (int64, error) {
 	recStmt, err := db.Prepare(
-		"INSERT OR IGNORE INTO recipe (name, description, instructions) VALUES (?, ?, ?)")
+		"INSERT OR IGNORE INTO recipe (name, description, instructions, source) VALUES (?, ?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -486,7 +493,7 @@ func SubmitRecipe(rec Recipe) (int64, error) {
 	 * Repeat similar process for tags
 	 */
 	// RECIPE SECTION
-	result, err := recStmt.Exec(rec.Name, rec.Description, strings.Join(rec.Instructions, "|"))
+	result, err := recStmt.Exec(rec.Name, rec.Description, strings.Join(rec.Instructions, "|"), rec.Source)
 	if err != nil {
 		return 0, fmt.Errorf("SubmitRecipe: %v", err)
 	}
@@ -596,6 +603,7 @@ func GetRecipeByID(id int64) (Recipe, error) {
 	rec.Instructions = strings.Split(recDB.Instructions, "|")
 	rec.Ingredients = make([]Ingredient, 0)
 	rec.Tags = make([]string, 0)
+	rec.Source = recDB.Source
 
 	for _, ri := range riDB {
 		unitDB, err := queryUnitTableByID(ri.UnitID)

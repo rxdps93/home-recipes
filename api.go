@@ -52,7 +52,6 @@ func Tags(w http.ResponseWriter, req *http.Request) {
 
 func RecipesByTag(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
-		log.Printf("RecipesByTag: %v\n", req.URL)
 		tag := req.PathValue("tag")
 		content := GenerateRecipesByTagHTML(tag)
 		w.Header().Set("Content-Type", "text/html")
@@ -67,7 +66,7 @@ func Test(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
 		vals, ok := req.URL.Query()["tag"]
 		if !ok || len(vals) < 1 {
-			log.Println("ouch")
+			log.Println("No params found!")
 		} else {
 			log.Printf("There are %v params: %v\n", len(vals), vals)
 		}

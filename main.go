@@ -24,6 +24,7 @@ type Recipe struct {
 	Instructions []string     `json:"instructions"`
 	Ingredients  []Ingredient `json:"ingredients"`
 	Tags         []string     `json:"tags"`
+	Source       string       `json:"source"`
 }
 
 func main() {
@@ -91,4 +92,5 @@ func printRecipe(rec Recipe) {
 	for _, tag := range rec.Tags {
 		fmt.Printf("\t%v\n", tag)
 	}
+	fmt.Printf("Recipe Source:\n\t%v\n", rec.Source)
 }

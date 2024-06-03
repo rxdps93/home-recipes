@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/url"
 	"sort"
 	"strconv"
 
@@ -139,6 +140,14 @@ func GenerateRecipeDetailHTML(id string) string {
 		)
 	}
 
+	var src elem.Node
+	_, err = url.ParseRequestURI(rec.Source)
+	if err != nil {
+		src = elem.Text(fmt.Sprintf(rec.Source))
+	} else {
+		src = elem.A(attrs.Props{attrs.Href: rec.Source}, elem.Text(rec.Source))
+	}
+
 	body := elem.Body(nil,
 		elem.Header(nil, elem.H1(nil, elem.Text(rec.Name))),
 		elem.P(nil, elem.Text(rec.Description)),
@@ -149,6 +158,8 @@ func GenerateRecipeDetailHTML(id string) string {
 			instr,
 			elem.H3(nil, elem.Text("Tags")),
 			tags,
+			elem.B(nil, elem.Text("Recipe Source: ")),
+			src,
 		),
 	)
 
