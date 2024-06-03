@@ -54,6 +54,7 @@ func GenerateRecipesHTML() string {
 		return recs[i].Name < recs[j].Name
 	})
 
+	// TODO: use transformeach
 	body := elem.Body(nil, elem.H1(nil, elem.Text("All Recipes:")))
 	for _, rec := range recs {
 		body.Children = append(body.Children,
@@ -82,6 +83,7 @@ func GenerateTagsHTML() string {
 		return tags[i] < tags[j]
 	})
 
+	// TODO: use transformeach
 	body := elem.Body(nil, elem.H1(nil, elem.Text("All Tags:")))
 	for _, tag := range tags {
 		body.Children = append(body.Children,
@@ -116,29 +118,26 @@ func GenerateRecipeDetailHTML(id string) string {
 
 	head := generateHeadNode(rec.Name, rec.Description)
 
-	ings := elem.Ul(nil)
-	for _, ing := range rec.Ingredients {
-		ings.Children = append(ings.Children,
-			elem.Li(nil, elem.Text(fmt.Sprintf("%v %v %v", ing.Quantity, ing.Unit, ing.Label))),
-		)
-	}
+	ings := elem.Ul(nil,
+		elem.TransformEach(rec.Ingredients, func(ing Ingredient) elem.Node {
+			return elem.Li(nil, elem.Text(fmt.Sprintf("%v %v %v", ing.Quantity, ing.Unit, ing.Label)))
+		})...,
+	)
 
-	instr := elem.Ol(nil)
-	for _, step := range rec.Instructions {
-		instr.Children = append(instr.Children,
-			elem.Li(nil, elem.Text(step)),
-		)
-	}
+	instr := elem.Ol(nil,
+		elem.TransformEach(rec.Instructions, func(step string) elem.Node {
+			return elem.Li(nil, elem.Text(step))
+		})...,
+	)
 
-	tags := elem.Ul(nil)
-	for _, tag := range rec.Tags {
-		tags.Children = append(tags.Children,
-			elem.Li(nil,
+	tags := elem.Ul(nil,
+		elem.TransformEach(rec.Tags, func(tag string) elem.Node {
+			return elem.Li(nil,
 				elem.A(attrs.Props{attrs.Href: fmt.Sprintf("/tags/%v", tag)},
 					elem.Text(tag)),
-			),
-		)
-	}
+			)
+		})...,
+	)
 
 	var src elem.Node
 	_, err = url.ParseRequestURI(rec.Source)
@@ -183,15 +182,15 @@ func GenerateRecipesByTagHTML(tag string) string {
 		return recs[i].Name < recs[j].Name
 	})
 
-	tags := elem.Ul(nil)
-	for _, rec := range recs {
-		tags.Children = append(tags.Children,
-			elem.H2(nil,
+	tags := elem.Ul(nil,
+		elem.TransformEach(recs, func(rec Recipe) elem.Node {
+			return elem.Li(nil,
 				elem.A(attrs.Props{attrs.Href: fmt.Sprintf("/recipes/%v", rec.ID)},
-					elem.Text(rec.Name)),
-			),
-		)
-	}
+					elem.Text(rec.Name),
+				),
+			)
+		})...,
+	)
 
 	body := elem.Body(nil, elem.H1(nil,
 		elem.Text(fmt.Sprintf("Recipes Tagged As %v:", tag)), tags))
