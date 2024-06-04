@@ -12,6 +12,7 @@ import (
 
 func generateErrorNode(err error, msg string) elem.Node {
 	return elem.Body(nil,
+		generateNavigationHTML(),
 		elem.H1(nil,
 			elem.Text(msg),
 		),
@@ -32,6 +33,7 @@ func GenerateHomeHTML() string {
 	head := generateHeadNode("Home", "Home Description")
 
 	body := elem.Div(nil,
+		generateNavigationHTML(),
 		elem.H1(nil, elem.Text("Test Homepage")),
 		elem.A(attrs.Props{attrs.Href: "/recipes"}, elem.Text("View All Recipes")),
 	)
@@ -54,16 +56,19 @@ func GenerateRecipesHTML() string {
 		return recs[i].Name < recs[j].Name
 	})
 
-	// TODO: use transformeach
-	body := elem.Body(nil, elem.H1(nil, elem.Text("All Recipes:")))
-	for _, rec := range recs {
-		body.Children = append(body.Children,
-			elem.H2(nil,
-				elem.A(attrs.Props{attrs.Href: fmt.Sprintf("/recipes/%v", rec.ID)},
-					elem.Text(rec.Name)),
-			),
-		)
-	}
+	body := elem.Body(nil,
+		generateNavigationHTML(),
+		elem.H2(nil, elem.Text("All Recipes:")),
+		elem.Ul(nil,
+			elem.TransformEach(recs, func(rec Recipe) elem.Node {
+				return elem.Li(nil,
+					elem.A(attrs.Props{attrs.Href: fmt.Sprintf("/recipes/%v", rec.ID)},
+						elem.Text(rec.Name),
+					),
+				)
+			})...,
+		),
+	)
 
 	html := elem.Html(nil, head, body)
 
@@ -83,16 +88,19 @@ func GenerateTagsHTML() string {
 		return tags[i] < tags[j]
 	})
 
-	// TODO: use transformeach
-	body := elem.Body(nil, elem.H1(nil, elem.Text("All Tags:")))
-	for _, tag := range tags {
-		body.Children = append(body.Children,
-			elem.H2(nil,
-				elem.A(attrs.Props{attrs.Href: fmt.Sprintf("/tags/%v", tag)},
-					elem.Text(tag)),
-			),
-		)
-	}
+	body := elem.Body(nil,
+		generateNavigationHTML(),
+		elem.H2(nil, elem.Text("All Tags:")),
+		elem.Ul(nil,
+			elem.TransformEach(tags, func(tag string) elem.Node {
+				return elem.Li(nil,
+					elem.A(attrs.Props{attrs.Href: fmt.Sprintf("/tags/%v", tag)},
+						elem.Text(tag),
+					),
+				)
+			})...,
+		),
+	)
 
 	html := elem.Html(nil, head, body)
 
@@ -148,6 +156,7 @@ func GenerateRecipeDetailHTML(id string) string {
 	}
 
 	body := elem.Body(nil,
+		generateNavigationHTML(),
 		elem.Header(nil, elem.H1(nil, elem.Text(rec.Name))),
 		elem.P(nil, elem.Text(rec.Description)),
 		elem.Main(nil,
@@ -192,10 +201,23 @@ func GenerateRecipesByTagHTML(tag string) string {
 		})...,
 	)
 
-	body := elem.Body(nil, elem.H1(nil,
-		elem.Text(fmt.Sprintf("Recipes Tagged As %v:", tag)), tags))
+	body := elem.Body(nil,
+		generateNavigationHTML(),
+		elem.H2(nil, elem.Text(fmt.Sprintf("Recipes Tagged As %v:", tag))),
+		tags,
+	)
 
 	html := elem.Html(nil, head, body)
 
 	return html.Render()
+}
+
+func generateNavigationHTML() elem.Node {
+	return elem.Div(nil,
+		elem.Ul(nil,
+			elem.Li(nil, elem.A(attrs.Props{attrs.Href: "/"}, elem.Text("Home"))),
+			elem.Li(nil, elem.A(attrs.Props{attrs.Href: "/recipes"}, elem.Text("Recipes"))),
+			elem.Li(nil, elem.A(attrs.Props{attrs.Href: "/tags"}, elem.Text("Tags"))),
+		),
+	)
 }
