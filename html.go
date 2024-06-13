@@ -11,7 +11,7 @@ import (
 )
 
 func generateErrorNode(err error, msg string) elem.Node {
-	return elem.Body(nil,
+	return elem.Body(attrs.Props{attrs.Style: BodyStyle.ToInline()},
 		generateNavigationHTML(),
 		elem.H1(nil,
 			elem.Text(msg),
@@ -32,9 +32,10 @@ func generateHeadNode(title string, description string) elem.Node {
 func GenerateHomeHTML() string {
 	head := generateHeadNode("Home", "Home Description")
 
-	body := elem.Div(nil,
+	body := elem.Div(
+		attrs.Props{attrs.Style: BodyStyle.ToInline()},
 		generateNavigationHTML(),
-		elem.H1(nil, elem.Text("Test Homepage")),
+		elem.H1(attrs.Props{attrs.Style: BaseH1Style.ToInline()}, elem.Text("Test Homepage")),
 		elem.A(attrs.Props{attrs.Href: "/recipes"}, elem.Text("View All Recipes")),
 	)
 
@@ -56,7 +57,7 @@ func GenerateRecipesHTML() string {
 		return recs[i].Name < recs[j].Name
 	})
 
-	body := elem.Body(nil,
+	body := elem.Body(attrs.Props{attrs.Style: BodyStyle.ToInline()},
 		generateNavigationHTML(),
 		elem.H2(nil, elem.Text("All Recipes:")),
 		elem.Ul(nil,
@@ -88,7 +89,7 @@ func GenerateTagsHTML() string {
 		return tags[i] < tags[j]
 	})
 
-	body := elem.Body(nil,
+	body := elem.Body(attrs.Props{attrs.Style: BodyStyle.ToInline()},
 		generateNavigationHTML(),
 		elem.H2(nil, elem.Text("All Tags:")),
 		elem.Ul(nil,
@@ -110,7 +111,7 @@ func GenerateTagsHTML() string {
 func GenerateRecipeDetailHTML(id string) string {
 	recID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
-		head := elem.Head(nil, elem.Title(nil, elem.Text("Error loading recipe")))
+		head := generateHeadNode("Error", "Unable to Load Recipe")
 		body := generateErrorNode(err, "Malformed recipe ID.")
 		html := elem.Html(nil, head, body)
 		return html.Render()
@@ -118,7 +119,7 @@ func GenerateRecipeDetailHTML(id string) string {
 
 	rec, err := GetRecipeByID(recID)
 	if err != nil {
-		head := elem.Head(nil, elem.Title(nil, elem.Text("Error loading recipe")))
+		head := generateHeadNode("Error", "Unable to Load Recipe")
 		body := generateErrorNode(err, "Unable to load recipe.")
 		html := elem.Html(nil, head, body)
 		return html.Render()
@@ -155,7 +156,7 @@ func GenerateRecipeDetailHTML(id string) string {
 		src = elem.A(attrs.Props{attrs.Href: rec.Source}, elem.Text(rec.Source))
 	}
 
-	body := elem.Body(nil,
+	body := elem.Body(attrs.Props{attrs.Style: BodyStyle.ToInline()},
 		generateNavigationHTML(),
 		elem.Header(nil, elem.H1(nil, elem.Text(rec.Name))),
 		elem.P(nil, elem.Text(rec.Description)),
@@ -179,7 +180,7 @@ func GenerateRecipeDetailHTML(id string) string {
 func GenerateRecipesByTagHTML(tag string) string {
 	recs, err := GetAllRecipesForTagName(tag)
 	if err != nil {
-		head := elem.Head(nil, elem.Title(nil, elem.Text("Error loading recipes")))
+		head := generateHeadNode("Error", "Unable to load recipes")
 		body := generateErrorNode(err, "Unable to load recipes")
 		html := elem.Html(nil, head, body)
 		return html.Render()
@@ -201,7 +202,7 @@ func GenerateRecipesByTagHTML(tag string) string {
 		})...,
 	)
 
-	body := elem.Body(nil,
+	body := elem.Body(attrs.Props{attrs.Style: BodyStyle.ToInline()},
 		generateNavigationHTML(),
 		elem.H2(nil, elem.Text(fmt.Sprintf("Recipes Tagged As %v:", tag))),
 		tags,
@@ -213,11 +214,25 @@ func GenerateRecipesByTagHTML(tag string) string {
 }
 
 func generateNavigationHTML() elem.Node {
-	return elem.Div(nil,
-		elem.Ul(nil,
-			elem.Li(nil, elem.A(attrs.Props{attrs.Href: "/"}, elem.Text("Home"))),
-			elem.Li(nil, elem.A(attrs.Props{attrs.Href: "/recipes"}, elem.Text("Recipes"))),
-			elem.Li(nil, elem.A(attrs.Props{attrs.Href: "/tags"}, elem.Text("Tags"))),
+	return elem.Div(attrs.Props{attrs.Style: NavStyle.ToInline()},
+		elem.Ul(attrs.Props{attrs.Style: NavUlStyle.ToInline()},
+			elem.Li(attrs.Props{attrs.Style: NavLiStyle.ToInline()},
+				elem.A(attrs.Props{
+					attrs.Style: FullNavAStyle.ToInline(),
+					attrs.Href:  "/",
+				}, elem.Text("Home"))),
+
+			elem.Li(attrs.Props{attrs.Style: NavLiStyle.ToInline()},
+				elem.A(attrs.Props{
+					attrs.Style: FullNavAStyle.ToInline(),
+					attrs.Href:  "/recipes",
+				}, elem.Text("Recipes"))),
+
+			elem.Li(attrs.Props{attrs.Style: NavLiStyle.ToInline()},
+				elem.A(attrs.Props{
+					attrs.Style: FullNavAStyle.ToInline(),
+					attrs.Href:  "/tags",
+				}, elem.Text("Tags"))),
 		),
 	)
 }
