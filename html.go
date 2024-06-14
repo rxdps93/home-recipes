@@ -29,19 +29,35 @@ func generateHeadNode(title string, description string) elem.Node {
 	)
 }
 
+func generateBodyStructure(headerText string, mainContent ...elem.Node) elem.Node {
+	return elem.Body(
+		attrs.Props{attrs.Style: BodyStyle.ToInline()},
+		elem.Header(nil,
+			elem.H1(attrs.Props{attrs.Style: HeaderH1Style.ToInline()},
+				elem.Text(headerText))),
+		generateNavigationHTML(),
+		elem.Main(attrs.Props{attrs.Style: MainStyle.ToInline()}, mainContent...),
+	)
+}
+
 func GenerateHomeHTML() string {
 	head := generateHeadNode("Home", "Home Description")
 
-	body := elem.Div(
-		attrs.Props{attrs.Style: BodyStyle.ToInline()},
-		generateNavigationHTML(),
-		elem.H1(attrs.Props{attrs.Style: BaseH1Style.ToInline()}, elem.Text("Test Homepage")),
-		elem.A(attrs.Props{attrs.Href: "/recipes"}, elem.Text("View All Recipes")),
+	body := generateBodyStructure("Test Homepage",
+		elem.H2(attrs.Props{attrs.Style: BaseH2Style.ToInline()},
+			elem.Text("Currently Under Construction :^)")),
+		elem.P(nil, elem.Text("I can't wait to see how this develops!")),
 	)
+	// body := elem.Div(
+	// 	attrs.Props{attrs.Style: BodyStyle.ToInline()},
+	// generateNavigationHTML(),
+	// elem.H1(attrs.Props{attrs.Style: BaseH1Style.ToInline()}, elem.Text("Test Homepage")),
+	// 	elem.A(attrs.Props{attrs.Href: "/recipes"}, elem.Text("View All Recipes")),
+	// )
 
 	html := elem.Html(nil, head, body)
 
-	return html.Render()
+	return html.RenderWithOptions(elem.RenderOptions{StyleManager: StyleMgr})
 }
 
 func GenerateRecipesHTML() string {
@@ -214,21 +230,34 @@ func GenerateRecipesByTagHTML(tag string) string {
 }
 
 func generateNavigationHTML() elem.Node {
-	return elem.Div(attrs.Props{attrs.Style: NavStyle.ToInline()},
+	navLiClass := StyleMgr.AddCompositeStyle(NavLiMediaQuery)
+	return elem.Nav(attrs.Props{
+		attrs.Style: NavStyle.ToInline(),
+		attrs.Class: StyleMgr.AddCompositeStyle(NavMediaQuery),
+	},
 		elem.Ul(attrs.Props{attrs.Style: NavUlStyle.ToInline()},
-			elem.Li(attrs.Props{attrs.Style: NavLiStyle.ToInline()},
+			elem.Li(attrs.Props{
+				attrs.Style: NavLiStyle.ToInline(),
+				attrs.Class: navLiClass,
+			},
 				elem.A(attrs.Props{
 					attrs.Style: FullNavAStyle.ToInline(),
 					attrs.Href:  "/",
 				}, elem.Text("Home"))),
 
-			elem.Li(attrs.Props{attrs.Style: NavLiStyle.ToInline()},
+			elem.Li(attrs.Props{
+				attrs.Style: NavLiStyle.ToInline(),
+				attrs.Class: navLiClass,
+			},
 				elem.A(attrs.Props{
 					attrs.Style: FullNavAStyle.ToInline(),
 					attrs.Href:  "/recipes",
 				}, elem.Text("Recipes"))),
 
-			elem.Li(attrs.Props{attrs.Style: NavLiStyle.ToInline()},
+			elem.Li(attrs.Props{
+				attrs.Style: NavLiStyle.ToInline(),
+				attrs.Class: navLiClass,
+			},
 				elem.A(attrs.Props{
 					attrs.Style: FullNavAStyle.ToInline(),
 					attrs.Href:  "/tags",

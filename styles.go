@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/chasefleming/elem-go"
 	"github.com/chasefleming/elem-go/styles"
 )
 
@@ -14,21 +13,41 @@ var (
 
 var StyleMgr = styles.NewStyleManager()
 
-var StyleTag = elem.CSS("")
+var NavMediaQuery = styles.CompositeStyle{
+	MediaQueries: map[string]styles.Props{
+		"@media (min-width: 1275px) ": {
+			"float":      "left",
+			"width":      navWidth,
+			"position":   "fixed",
+			"text-align": "left",
+			"font-size":  "large",
+		},
+	},
+}
+
+var NavLiMediaQuery = styles.CompositeStyle{
+	MediaQueries: map[string]styles.Props{
+		"@media (min-width: 1275px) ": {
+			"display":    "block",
+			"text-align": "center",
+			"margin":     "0.5em auto",
+		},
+	},
+}
 
 var BodyStyle = styles.Props{
 	styles.Color:      "White",
 	styles.Background: "#011",
 }
 
-var HeaderH1Style = styles.Props{
+var HeaderH1Style = styles.Merge(BaseH1Style, styles.Props{
 	styles.MaxWidth:      primaryWidth,
-	styles.FontSize:      "x-large",
+	styles.FontSize:      "xxx-large",
 	styles.MarginLeft:    "auto",
 	styles.MarginRight:   "auto",
 	styles.FontVariant:   "small-caps",
 	styles.LetterSpacing: "0.5rem",
-}
+})
 
 var HeaderH3Style = styles.Props{
 	styles.MaxWidth:    primaryWidth,
