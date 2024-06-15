@@ -231,9 +231,12 @@ func GenerateRecipesByTagHTML(tag string) string {
 
 func generateNavigationHTML() elem.Node {
 	navLiClass := StyleMgr.AddCompositeStyle(NavLiMediaQuery)
+	navAHoverClass := StyleMgr.AddCompositeStyle(NavAHoverLiClass)
+	navMediaQuery := StyleMgr.AddCompositeStyle(NavMediaQuery)
+	navBeforeMediaQuery := StyleMgr.AddCompositeStyle(NavBeforeMediaQuery)
 	return elem.Nav(attrs.Props{
 		attrs.Style: NavStyle.ToInline(),
-		attrs.Class: StyleMgr.AddCompositeStyle(NavMediaQuery),
+		attrs.Class: navMediaQuery + " " + navBeforeMediaQuery,
 	},
 		elem.Ul(attrs.Props{attrs.Style: NavUlStyle.ToInline()},
 			elem.Li(attrs.Props{
@@ -241,8 +244,8 @@ func generateNavigationHTML() elem.Node {
 				attrs.Class: navLiClass,
 			},
 				elem.A(attrs.Props{
-					attrs.Style: FullNavAStyle.ToInline(),
 					attrs.Href:  "/",
+					attrs.Class: navAHoverClass,
 				}, elem.Text("Home"))),
 
 			elem.Li(attrs.Props{
@@ -250,8 +253,8 @@ func generateNavigationHTML() elem.Node {
 				attrs.Class: navLiClass,
 			},
 				elem.A(attrs.Props{
-					attrs.Style: FullNavAStyle.ToInline(),
 					attrs.Href:  "/recipes",
+					attrs.Class: navAHoverClass,
 				}, elem.Text("Recipes"))),
 
 			elem.Li(attrs.Props{
@@ -259,8 +262,8 @@ func generateNavigationHTML() elem.Node {
 				attrs.Class: navLiClass,
 			},
 				elem.A(attrs.Props{
-					attrs.Style: FullNavAStyle.ToInline(),
 					attrs.Href:  "/tags",
+					attrs.Class: navAHoverClass,
 				}, elem.Text("Tags"))),
 		),
 	)
