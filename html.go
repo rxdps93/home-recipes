@@ -43,7 +43,7 @@ func GenerateTestHTML() string {
 }
 
 func generateErrorNode(err error, msg string) elem.Node {
-	return elem.Body(attrs.Props{attrs.Style: BodyStyle.ToInline()},
+	return elem.Body(nil,
 		generateNavigationHTML(),
 		elem.H1(nil,
 			elem.Text(msg),
@@ -55,6 +55,7 @@ func generateErrorNode(err error, msg string) elem.Node {
 func generateHeadNode(title string, description string) elem.Node {
 	return elem.Head(nil,
 		elem.Title(nil, elem.Text(title)),
+		elem.Link(attrs.Props{attrs.Rel: "stylesheet", attrs.Type: "text/css", attrs.Href: "/css/style.css"}),
 		elem.Meta(attrs.Props{attrs.Charset: "utf-8"}),
 		elem.Meta(attrs.Props{attrs.Name: "description", attrs.Content: description}),
 		elem.Meta(attrs.Props{attrs.Name: "viewport", attrs.Content: "width=device-width, initial-scale=1"}),
@@ -62,13 +63,11 @@ func generateHeadNode(title string, description string) elem.Node {
 }
 
 func generateBodyStructure(headerText string, mainContent ...elem.Node) elem.Node {
-	return elem.Body(
-		attrs.Props{attrs.Style: BodyStyle.ToInline()},
+	return elem.Body(nil,
 		elem.Header(nil,
-			elem.H1(attrs.Props{attrs.Style: HeaderH1Style.ToInline()},
-				elem.Text(headerText))),
+			elem.H1(nil, elem.Text(headerText))),
 		generateNavigationHTML(),
-		elem.Main(attrs.Props{attrs.Style: MainStyle.ToInline()}, mainContent...),
+		elem.Main(nil, mainContent...),
 	)
 }
 
@@ -76,22 +75,23 @@ func GenerateHomeHTML() string {
 	head := generateHeadNode("Home", "Home Description")
 
 	body := generateBodyStructure("Test Homepage",
-		elem.H2(attrs.Props{attrs.Style: BaseH2Style.ToInline()},
-			elem.Text("Currently Under Construction :^)")),
-		elem.P(nil, elem.Text("I can't wait to see how this develops!")),
+		elem.H2(nil, elem.Text("This website is under construction :^)")),
+		elem.H2(nil, elem.Text("Styling is via traditional css stylesheet linking.")),
+		elem.P(nil, elem.Text("Stylemanager was very interesting to learn but made complex styling more tedious than just writing CSS.")),
+		elem.H2(nil, elem.Text("Here is a list:")),
+		elem.Ul(nil,
+			elem.Li(nil, elem.Text("List item 1")),
+			elem.Li(nil, elem.Text("Nice weather today")),
+			elem.Li(nil, elem.Text("A Møøse once bit my sister...")),
+		),
 	)
-	// body := elem.Div(
-	// 	attrs.Props{attrs.Style: BodyStyle.ToInline()},
-	// generateNavigationHTML(),
-	// elem.H1(attrs.Props{attrs.Style: BaseH1Style.ToInline()}, elem.Text("Test Homepage")),
-	// 	elem.A(attrs.Props{attrs.Href: "/recipes"}, elem.Text("View All Recipes")),
-	// )
 
 	html := elem.Html(nil, head, body)
 
-	return html.RenderWithOptions(elem.RenderOptions{StyleManager: StyleMgr})
+	return html.Render()
 }
 
+// TODO: update this to new html/styling standards
 func GenerateRecipesHTML() string {
 	head := generateHeadNode("Recipes", "View All Recipes")
 
@@ -105,7 +105,7 @@ func GenerateRecipesHTML() string {
 		return recs[i].Name < recs[j].Name
 	})
 
-	body := elem.Body(attrs.Props{attrs.Style: BodyStyle.ToInline()},
+	body := elem.Body(nil,
 		generateNavigationHTML(),
 		elem.H2(nil, elem.Text("All Recipes:")),
 		elem.Ul(nil,
@@ -124,6 +124,7 @@ func GenerateRecipesHTML() string {
 	return html.Render()
 }
 
+// TODO: same as above
 func GenerateTagsHTML() string {
 	head := generateHeadNode("Tags", "View All Tags")
 
@@ -137,7 +138,7 @@ func GenerateTagsHTML() string {
 		return tags[i] < tags[j]
 	})
 
-	body := elem.Body(attrs.Props{attrs.Style: BodyStyle.ToInline()},
+	body := elem.Body(nil,
 		generateNavigationHTML(),
 		elem.H2(nil, elem.Text("All Tags:")),
 		elem.Ul(nil,
@@ -156,6 +157,7 @@ func GenerateTagsHTML() string {
 	return html.Render()
 }
 
+// TODO: same as above
 func GenerateRecipeDetailHTML(id string) string {
 	recID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
@@ -204,7 +206,7 @@ func GenerateRecipeDetailHTML(id string) string {
 		src = elem.A(attrs.Props{attrs.Href: rec.Source}, elem.Text(rec.Source))
 	}
 
-	body := elem.Body(attrs.Props{attrs.Style: BodyStyle.ToInline()},
+	body := elem.Body(nil,
 		generateNavigationHTML(),
 		elem.Header(nil, elem.H1(nil, elem.Text(rec.Name))),
 		elem.P(nil, elem.Text(rec.Description)),
@@ -225,6 +227,7 @@ func GenerateRecipeDetailHTML(id string) string {
 	return html.Render()
 }
 
+// TODO: same as above
 func GenerateRecipesByTagHTML(tag string) string {
 	recs, err := GetAllRecipesForTagName(tag)
 	if err != nil {
@@ -250,7 +253,7 @@ func GenerateRecipesByTagHTML(tag string) string {
 		})...,
 	)
 
-	body := elem.Body(attrs.Props{attrs.Style: BodyStyle.ToInline()},
+	body := elem.Body(nil,
 		generateNavigationHTML(),
 		elem.H2(nil, elem.Text(fmt.Sprintf("Recipes Tagged As %v:", tag))),
 		tags,
@@ -261,43 +264,13 @@ func GenerateRecipesByTagHTML(tag string) string {
 	return html.Render()
 }
 
+// TODO: consider moving tags to be within the recipes section
 func generateNavigationHTML() elem.Node {
-	navLiClass := StyleMgr.AddCompositeStyle(NavLiMediaQuery)
-	navAHoverClass := StyleMgr.AddCompositeStyle(NavAHoverLiClass)
-	navMediaQuery := StyleMgr.AddCompositeStyle(NavMediaQuery)
-	navBeforeMediaQuery := StyleMgr.AddCompositeStyle(NavBeforeMediaQuery)
-
-	return elem.Nav(attrs.Props{
-		attrs.Style: NavStyle.ToInline(),
-		attrs.Class: navMediaQuery + " " + navBeforeMediaQuery,
-	},
-		elem.Ul(attrs.Props{attrs.Style: NavUlStyle.ToInline()},
-			elem.A(attrs.Props{
-				attrs.Href:  "/",
-				attrs.Class: navAHoverClass,
-			},
-				elem.Li(attrs.Props{
-					attrs.Style: NavLiStyle.ToInline(),
-					attrs.Class: navLiClass,
-				}, elem.Text("Home"))),
-
-			elem.A(attrs.Props{
-				attrs.Href:  "/recipes",
-				attrs.Class: navAHoverClass,
-			},
-				elem.Li(attrs.Props{
-					attrs.Style: NavLiStyle.ToInline(),
-					attrs.Class: navLiClass,
-				}, elem.Text("Recipes"))),
-
-			elem.A(attrs.Props{
-				attrs.Href:  "/tags",
-				attrs.Class: navAHoverClass,
-			},
-				elem.Li(attrs.Props{
-					attrs.Style: NavLiStyle.ToInline(),
-					attrs.Class: navLiClass,
-				}, elem.Text("Tags"))),
+	return elem.Nav(nil,
+		elem.Ul(nil,
+			elem.A(attrs.Props{attrs.Href: "/"}, elem.Li(nil, elem.Text("Home"))),
+			elem.A(attrs.Props{attrs.Href: "/recipes"}, elem.Li(nil, elem.Text("Recipes"))),
+			elem.A(attrs.Props{attrs.Href: "/tags"}, elem.Li(nil, elem.Text("Tags"))),
 		),
 	)
 }
