@@ -10,6 +10,38 @@ import (
 	"github.com/chasefleming/elem-go/attrs"
 )
 
+func GenerateTestHTML() string {
+	head := elem.Head(nil,
+		elem.Title(nil, elem.Text("css test page")),
+		elem.Link(attrs.Props{attrs.Rel: "stylesheet", attrs.Type: "text/css", attrs.Href: "/css/style.css"}),
+		elem.Meta(attrs.Props{attrs.Charset: "utf-8"}),
+		elem.Meta(attrs.Props{attrs.Name: "description", attrs.Content: "a test page for css"}),
+		elem.Meta(attrs.Props{attrs.Name: "viewport", attrs.Content: "width=device-width, initial-scale=1"}),
+	)
+
+	body := elem.Body(nil,
+		elem.Header(nil, elem.H1(nil, elem.Text("CSS Test Page"))),
+		elem.Nav(nil, elem.Ul(nil,
+			elem.A(attrs.Props{attrs.Href: "/"}, elem.Li(nil, elem.Text("Home"))),
+			elem.A(attrs.Props{attrs.Href: "/recipes"}, elem.Li(nil, elem.Text("Recipes"))),
+			elem.A(attrs.Props{attrs.Href: "/tags"}, elem.Li(nil, elem.Text("Tags"))),
+		)),
+		elem.Main(nil,
+			elem.H2(nil, elem.Text("This is for testing stylesheet linking :^)")),
+			elem.H2(nil, elem.Text("I hope this is much easier than stylemanager!")),
+			elem.P(nil, elem.Text("If so this will make development much less tedious.")),
+			elem.H2(nil, elem.Text("List for testing:")),
+			elem.Ul(nil,
+				elem.Li(nil, elem.Text("List item 1")),
+				elem.Li(nil, elem.Text("Nice weather today")),
+				elem.Li(nil, elem.Text("A Møøse once bit my sister...")),
+			),
+		),
+	)
+	html := elem.Html(nil, head, body)
+	return html.Render()
+}
+
 func generateErrorNode(err error, msg string) elem.Node {
 	return elem.Body(attrs.Props{attrs.Style: BodyStyle.ToInline()},
 		generateNavigationHTML(),
@@ -234,36 +266,37 @@ func generateNavigationHTML() elem.Node {
 	navAHoverClass := StyleMgr.AddCompositeStyle(NavAHoverLiClass)
 	navMediaQuery := StyleMgr.AddCompositeStyle(NavMediaQuery)
 	navBeforeMediaQuery := StyleMgr.AddCompositeStyle(NavBeforeMediaQuery)
+
 	return elem.Nav(attrs.Props{
 		attrs.Style: NavStyle.ToInline(),
 		attrs.Class: navMediaQuery + " " + navBeforeMediaQuery,
 	},
 		elem.Ul(attrs.Props{attrs.Style: NavUlStyle.ToInline()},
-			elem.Li(attrs.Props{
-				attrs.Style: NavLiStyle.ToInline(),
-				attrs.Class: navLiClass,
+			elem.A(attrs.Props{
+				attrs.Href:  "/",
+				attrs.Class: navAHoverClass,
 			},
-				elem.A(attrs.Props{
-					attrs.Href:  "/",
-					attrs.Class: navAHoverClass,
+				elem.Li(attrs.Props{
+					attrs.Style: NavLiStyle.ToInline(),
+					attrs.Class: navLiClass,
 				}, elem.Text("Home"))),
 
-			elem.Li(attrs.Props{
-				attrs.Style: NavLiStyle.ToInline(),
-				attrs.Class: navLiClass,
+			elem.A(attrs.Props{
+				attrs.Href:  "/recipes",
+				attrs.Class: navAHoverClass,
 			},
-				elem.A(attrs.Props{
-					attrs.Href:  "/recipes",
-					attrs.Class: navAHoverClass,
+				elem.Li(attrs.Props{
+					attrs.Style: NavLiStyle.ToInline(),
+					attrs.Class: navLiClass,
 				}, elem.Text("Recipes"))),
 
-			elem.Li(attrs.Props{
-				attrs.Style: NavLiStyle.ToInline(),
-				attrs.Class: navLiClass,
+			elem.A(attrs.Props{
+				attrs.Href:  "/tags",
+				attrs.Class: navAHoverClass,
 			},
-				elem.A(attrs.Props{
-					attrs.Href:  "/tags",
-					attrs.Class: navAHoverClass,
+				elem.Li(attrs.Props{
+					attrs.Style: NavLiStyle.ToInline(),
+					attrs.Class: navLiClass,
 				}, elem.Text("Tags"))),
 		),
 	)

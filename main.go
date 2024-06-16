@@ -44,6 +44,9 @@ func main() {
 	mux.HandleFunc("GET /tags/{tag}", RecipesByTag)
 	mux.HandleFunc("GET /test", Test)
 
+	fs := http.FileServer(http.Dir("./css"))
+	mux.Handle("GET /css/", http.StripPrefix("/css", fs))
+
 	log.Println("Connecting...")
 	Connect()
 	log.Println("Connected to Database")

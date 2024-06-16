@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 )
 
@@ -64,12 +63,10 @@ func RecipesByTag(w http.ResponseWriter, req *http.Request) {
 
 func Test(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
-		vals, ok := req.URL.Query()["tag"]
-		if !ok || len(vals) < 1 {
-			log.Println("No params found!")
-		} else {
-			log.Printf("There are %v params: %v\n", len(vals), vals)
-		}
+		content := GenerateTestHTML()
+		w.Header().Set("Content-Type", "text/html")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(content))
 	} else {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}

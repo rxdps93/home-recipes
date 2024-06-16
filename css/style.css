@@ -1,0 +1,120 @@
+:root {
+	--primary-width: 900px;
+	--nav-width: 150px;
+	--border-color: white;
+	--btn-bg: #010;
+}
+
+body {
+	color: white;
+	background: #011;
+}
+
+header h1 {
+	max-width: var(--primary-width);
+	font-size: xxx-large;
+	margin-left: auto;
+	margin-right: auto;
+	font-variant: small-caps;
+	letter-spacing: 0.5rem;
+}
+
+header h3 {
+	max-width: var(--primary-width);
+	font-size: x-large;
+	margin-left: auto;
+	margin-right: auto;
+	font-variant: small-caps;
+	text-align: center;
+}
+
+nav {
+	max-width: var(--primary-width);
+	text-align: center;
+	clear: both;
+	margin: auto;
+	border: solid 1px var(--border-color);
+	border-radius: 10px;
+	font-variant: small-caps;
+	margin-bottom: 1em;
+}
+
+main {
+	max-width: var(--primary-width);
+	margin: auto;
+	border: solid 2px var(--border-color);
+	padding: 1em;
+	border-radius: 10px;
+}
+
+nav a {
+	text-decoration: none;
+	color: white;
+}
+
+nav li {
+	display: inline-block;
+	list-style: none;
+	border: dashed 1px var(--border-color);
+	border-radius: 10px;
+	padding: 0.5em;
+	max-width: 7em;
+	background: var(--btn-bg);
+}
+
+nav ul {
+	padding: 0;
+	margin: 0.5em;
+}
+
+nav a:hover li {
+	background: white;
+	color: #010;
+	box-shadow: 2px 2px orange;
+}
+
+h1 {
+	text-align: center;
+}
+
+h2 {
+	color: orange;
+}
+
+h3 {
+	color: #ccc;
+}
+
+/* primary + (nav * 2) + padding */
+@media (min-width: 1275px) {
+	nav {
+		float: left;
+		width: var(--nav-width);
+		position: fixed;
+		text-align: left;
+		font-size: large;
+	}
+
+	nav::before {
+		content: "Our Pages";
+		text-align: center;
+		display: block;
+		font-size: large;
+		color: white;
+		text-decoration: underline;
+		margin-top: 0.5em;
+	}
+
+	nav li {
+		display: block;
+		text-align: center;
+		margin: 0.5em auto;
+	}
+}
+
+@media print {
+	a[href] {
+		text-decoration: none;
+		color: black;
+	}
+}
