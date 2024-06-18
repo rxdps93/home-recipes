@@ -27,6 +27,7 @@ func GenerateTestHTML() string {
 			elem.A(attrs.Props{attrs.Href: "/tags"}, elem.Li(nil, elem.Text("Tags"))),
 		)),
 		elem.Main(nil,
+			elem.H1(nil, elem.Text("What does an H1 look like here?")),
 			elem.H2(nil, elem.Text("This is for testing stylesheet linking :^)")),
 			elem.H2(nil, elem.Text("I hope this is much easier than stylemanager!")),
 			elem.P(nil, elem.Text("If so this will make development much less tedious.")),
@@ -91,7 +92,27 @@ func GenerateHomeHTML() string {
 	return html.Render()
 }
 
-// TODO: update this to new html/styling standards
+func recipeJumpLinks() elem.Node {
+	content := elem.Div(attrs.Props{attrs.Class: "rec-jump"},
+		elem.Hr(nil),
+		elem.H3(nil, elem.Text("Jump to Section...")),
+	)
+
+	for ltr := 'A'; ltr < 'Z'; ltr++ {
+		content.Children = append(content.Children,
+			elem.A(attrs.Props{attrs.Href: "#" + string(ltr)}, elem.Text(string(ltr))),
+			elem.Text("&middot;"),
+		)
+	}
+	content.Children = append(content.Children,
+		elem.A(attrs.Props{attrs.Href: "#Z"}, elem.Text("Z")),
+		elem.Hr(nil),
+	)
+
+	return content
+}
+
+// TODO: update styling on li
 func GenerateRecipesHTML() string {
 	head := generateHeadNode("Recipes", "View All Recipes")
 
@@ -105,17 +126,19 @@ func GenerateRecipesHTML() string {
 		return recs[i].Name < recs[j].Name
 	})
 
-	body := elem.Body(nil,
-		generateNavigationHTML(),
-		elem.H2(nil, elem.Text("All Recipes:")),
-		elem.Ul(nil,
-			elem.TransformEach(recs, func(rec Recipe) elem.Node {
-				return elem.Li(nil,
-					elem.A(attrs.Props{attrs.Href: fmt.Sprintf("/recipes/%v", rec.ID)},
-						elem.Text(rec.Name),
-					),
-				)
-			})...,
+	body := generateBodyStructure("Family Recipe Index",
+		elem.H1(nil, elem.Text("View All Recipes")),
+		recipeJumpLinks(),
+		elem.Div(attrs.Props{attrs.Class: "rec-links"},
+			elem.Ul(nil,
+				elem.TransformEach(recs, func(rec Recipe) elem.Node {
+					return elem.Li(nil,
+						elem.A(attrs.Props{attrs.Href: fmt.Sprintf("/recipes/%v", rec.ID)},
+							elem.Text(rec.Name),
+						),
+					)
+				})...,
+			),
 		),
 	)
 
@@ -265,6 +288,7 @@ func GenerateRecipesByTagHTML(tag string) string {
 }
 
 // TODO: consider moving tags to be within the recipes section
+// TODO: swap A and Li to be valid html
 func generateNavigationHTML() elem.Node {
 	return elem.Nav(nil,
 		elem.Ul(nil,

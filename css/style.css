@@ -47,6 +47,11 @@ main {
 	border-radius: 10px;
 }
 
+main h1 {
+    font-variant: small-caps;
+    letter-spacing: 0.25rem;
+}
+
 nav a {
 	text-decoration: none;
 	color: white;
@@ -84,6 +89,49 @@ h2 {
 h3 {
 	color: #ccc;
 }
+
+/* BEGIN RECIPE LINKS */
+.rec-jump {
+    text-align: center;
+}
+
+.rec-jump a {
+    color: white;
+    font-size: large;
+}
+
+.rec-jump hr {
+    color: #ccc;
+    width: 75%;
+}
+
+.rec-links {
+    margin-bottom: 2.5em;
+}
+
+.rec-links ul {
+    list-style-type: none;
+}
+
+.rec-links a {
+    display: inline-block;
+    font-size: large;
+    text-decoration: none;
+    color: white;
+    border: dashed 1px var(--border-color);
+    border-radius: 5px;
+    padding: 0.5em;
+    background: var(--btn-bg);
+    margin: 0.1em;
+}
+
+.rec-links a:hover {
+    background: white;
+    color: #010;
+    box-shadow: 2px 2px green;
+}
+
+/* END RECIPE LINKS */
 
 /* primary + (nav * 2) + padding */
 @media (min-width: 1275px) {
