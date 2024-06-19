@@ -98,11 +98,12 @@ h3 {
 .rec-jump a {
     color: white;
     font-size: large;
+    padding: 0.25em;
 }
 
 .rec-jump hr {
-    color: #ccc;
     width: 75%;
+    border: dashed 1px #ccc;
 }
 
 .rec-links {

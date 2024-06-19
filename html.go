@@ -92,27 +92,28 @@ func GenerateHomeHTML() string {
 	return html.Render()
 }
 
-func recipeJumpLinks() elem.Node {
+func recipeJumpLinks(ltrs []rune) elem.Node {
 	content := elem.Div(attrs.Props{attrs.Class: "rec-jump"},
 		elem.Hr(nil),
 		elem.H3(nil, elem.Text("Jump to Section...")),
 	)
 
-	for ltr := 'A'; ltr < 'Z'; ltr++ {
+	for i, ltr := range ltrs {
 		content.Children = append(content.Children,
 			elem.A(attrs.Props{attrs.Href: "#" + string(ltr)}, elem.Text(string(ltr))),
-			elem.Text("&middot;"),
 		)
+
+		if i != len(ltrs)-1 {
+			content.Children = append(content.Children, elem.Text("&middot;"))
+		} else {
+			content.Children = append(content.Children, elem.Hr(nil))
+		}
 	}
-	content.Children = append(content.Children,
-		elem.A(attrs.Props{attrs.Href: "#Z"}, elem.Text("Z")),
-		elem.Hr(nil),
-	)
 
 	return content
 }
 
-// TODO: update styling on li
+// TODO: generate jump destinations & populate with recipes
 func GenerateRecipesHTML() string {
 	head := generateHeadNode("Recipes", "View All Recipes")
 
@@ -126,9 +127,14 @@ func GenerateRecipesHTML() string {
 		return recs[i].Name < recs[j].Name
 	})
 
+	ltrs := make([]rune, 0)
+	for _, rec := range recs {
+		ltrs = append(ltrs, rune(rec.Name[0]))
+	}
+
 	body := generateBodyStructure("Family Recipe Index",
 		elem.H1(nil, elem.Text("View All Recipes")),
-		recipeJumpLinks(),
+		recipeJumpLinks(ltrs),
 		elem.Div(attrs.Props{attrs.Class: "rec-links"},
 			elem.Ul(nil,
 				elem.TransformEach(recs, func(rec Recipe) elem.Node {
@@ -147,7 +153,7 @@ func GenerateRecipesHTML() string {
 	return html.Render()
 }
 
-// TODO: same as above
+// TODO: update html structure & styling
 func GenerateTagsHTML() string {
 	head := generateHeadNode("Tags", "View All Tags")
 
