@@ -10,7 +10,6 @@ import (
 	"github.com/rxdps93/home-recipes/internal/db"
 )
 
-// TODO: update html structure & styling
 func GenerateRecipeDetailHTML(id string) string {
 	recID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
@@ -59,19 +58,26 @@ func GenerateRecipeDetailHTML(id string) string {
 		src = elem.A(attrs.Props{attrs.Href: rec.Source}, elem.Text(rec.Source))
 	}
 
-	body := elem.Body(nil,
-		GenerateNavigationHTML(),
-		elem.Header(nil, elem.H1(nil, elem.Text(rec.Name))),
-		elem.P(nil, elem.Text(rec.Description)),
-		elem.Main(nil,
+	body := GenerateBodyStructure(rec.Name,
+		elem.Div(attrs.Props{attrs.Class: "rec-desc"},
+			elem.P(nil, elem.Text(rec.Description)),
+		),
+		elem.Div(attrs.Props{attrs.Class: "rec-ings"},
 			elem.H2(nil, elem.Text("Ingredients")),
 			ings,
+		),
+		elem.Div(attrs.Props{attrs.Class: "rec-instr"},
 			elem.H2(nil, elem.Text("Instructions")),
 			instr,
+		),
+		elem.Hr(nil),
+		elem.Div(attrs.Props{attrs.Class: "rec-tags"},
 			elem.H3(nil, elem.Text("Tags")),
 			tags,
-			elem.B(nil, elem.Text("Recipe Source: ")),
-			src,
+		),
+		elem.Div(attrs.Props{attrs.Class: "rec-src"},
+			elem.H3(nil, elem.Text("Recipe Source: ")),
+			elem.P(nil, src),
 		),
 	)
 

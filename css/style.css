@@ -105,7 +105,9 @@ h3 {
     width: 75%;
     border: dashed 1px #ccc;
 }
+/* END RECIPE JUMP */
 
+/* BEGIN RECIPE LINKS */
 .rec-links {
     margin-bottom: 2.5em;
 }
@@ -129,10 +131,92 @@ h3 {
 .rec-links a:hover {
     background: white;
     color: #010;
-    box-shadow: 2px 2px green;
+    box-shadow: 2px 2px orange;
 }
 
 /* END RECIPE LINKS */
+
+/* BEGIN RECIPE DETAIL */
+.rec-desc p {
+    text-align: center;
+    font-size: large;
+    font-style: italic;
+}
+
+.rec-ings li {
+    font-size: large;
+}
+
+.rec-ings li:not(:last-child) {
+    margin-bottom: 10px;
+}
+
+.rec-ings li::marker {
+    content: '✝ ';
+}
+
+.rec-instr li {
+    font-size: large;
+}
+
+.rec-instr li:not(:last-child) {
+    margin-bottom: 10px;
+}
+
+.rec-tags a {
+    display: inline-block;
+    font-size: small;
+    text-decoration: none;
+    color: white;
+    border: dashed 1px var(--border-color);
+    border-radius: 5px;
+    padding: 0.5em;
+    background: var(--btn-bg);
+    margin: 0.1em;
+}
+
+.rec-tags ul {
+    list-style-type: none;
+}
+
+.rec-tags a:hover {
+    background: white;
+    color: #010;
+    box-shadow: 2px 2px orange;
+}
+
+.rec-tags li {
+    float: left;
+    margin-left: 3px;
+    margin-right: 3px;
+}
+
+.rec-src {
+    clear: both;
+    margin-top: 5em;
+}
+
+.rec-src p {
+    margin-left: 2.5em;
+}
+
+.rec-src a {
+    display: inline-block;
+    text-decoration: none;
+    color: white;
+    border: dashed 1px var(--border-color);
+    border-radius: 5px;
+    padding: 0.5em;
+    background: var(--btn-bg);
+    margin: 0.1em;
+}
+
+.rec-src a:hover {
+    background: white;
+    color: #010;
+    box-shadow: 2px 2px orange;
+}
+/* END RECIPE DETAIL */
 
 /* primary + (nav * 2) + padding */
 @media (min-width: 1275px) {
