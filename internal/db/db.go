@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
 	"database/sql"
@@ -8,6 +8,22 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 )
+
+type Ingredient struct {
+	Label    string  `json:"label"`
+	Quantity float64 `json:"quantity"`
+	Unit     string  `json:"unit"`
+}
+
+type Recipe struct {
+	ID           int64        `json:"id"`
+	Name         string       `json:"name"`
+	Description  string       `json:"description"`
+	Instructions []string     `json:"instructions"`
+	Ingredients  []Ingredient `json:"ingredients"`
+	Tags         []string     `json:"tags"`
+	Source       string       `json:"source"`
+}
 
 type RecipeDB struct {
 	ID           int64  `json:"recipe_id"`
@@ -186,6 +202,74 @@ func AddTestFreshGuacamoleRecipe() (int64, error) {
 	return id, nil
 }
 
+func AddTestGarlicLimeChicken() (int64, error) {
+	rec := Recipe{
+		Name:        "Garlic Lime Chicken",
+		Description: "An easy freezer meal recipe that can come together quickly in a slow cooker or in the oven.",
+		Instructions: []string{
+			"Add all of the ingredients into a large gallon sized ziplock freezer bag.",
+			"Freeze until needed or allow to marinate in the refrigerator overnight.",
+			"If preparing in the oven: Pour contents of bag into an oven safe dish and bake at 400° F for 25-35 minutes, or until an internal temperature of 165° F.",
+			"If preparing in the slow cooker: Pour contents of bag into slow clooker and let cook for 4-5 hours on high.",
+		},
+		Ingredients: []Ingredient{
+			{
+				Label:    "Chicken Breast",
+				Quantity: 2,
+				Unit:     "Lbs",
+			},
+			{
+				Label:    "Onion",
+				Quantity: 1,
+				Unit:     "",
+			},
+			{
+				Label:    "Garlic",
+				Quantity: 4,
+				Unit:     "Cloves",
+			},
+			{
+				Label:    "Lime",
+				Quantity: 1,
+				Unit:     "",
+			},
+			{
+				Label:    "Cilantro",
+				Quantity: 0.25,
+				Unit:     "Cup",
+			},
+			{
+				Label:    "Chili Powder",
+				Quantity: 1,
+				Unit:     "Teaspoon",
+			},
+			{
+				Label:    "Chicken Stock",
+				Quantity: 2,
+				Unit:     "Cups",
+			},
+			{
+				Label:    "Red Pepper Flakes",
+				Quantity: 0.5,
+				Unit:     "Teaspoons",
+			},
+		},
+		Tags: []string{
+			"Freezer Meals",
+			"Dinner",
+			"Family Recipe",
+		},
+		Source: "https://www.primallyinspired.com/garlic-lime-chicken-recipe-paleo/",
+	}
+
+	id, err := SubmitRecipe(rec)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
+}
+
 func AddTestGrilledCheeseRecipe() (int64, error) {
 	rec := Recipe{
 		Name:        "Grilled Cheese Sandwich",
@@ -356,7 +440,7 @@ func queryRecipeTagByRecipeID(recID int64) ([]RecipeTagDB, error) {
 	for rows.Next() {
 		var rt RecipeTagDB
 		if err := rows.Scan(&rt.ID, &rt.RecipeID, &rt.TagID); err != nil {
-			return nil, fmt.Errorf("queryRecipeTagByRecipeID", recID, err)
+			return nil, fmt.Errorf("queryRecipeTagByRecipeID %q: %v", recID, err)
 		}
 		tags = append(tags, rt)
 	}
@@ -378,7 +462,7 @@ func queryRecipeTagByTagID(tagID int64) ([]RecipeTagDB, error) {
 	for rows.Next() {
 		var rt RecipeTagDB
 		if err := rows.Scan(&rt.ID, &rt.RecipeID, &rt.TagID); err != nil {
-			return nil, fmt.Errorf("queryRecipeTagByTagID", tagID, err)
+			return nil, fmt.Errorf("queryRecipeTagByTagID %q: %v", tagID, err)
 		}
 		tags = append(tags, rt)
 	}

@@ -9,23 +9,9 @@ import (
 	"syscall"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/rxdps93/home-recipes/internal/api"
+	"github.com/rxdps93/home-recipes/internal/db"
 )
-
-type Ingredient struct {
-	Label    string  `json:"label"`
-	Quantity float64 `json:"quantity"`
-	Unit     string  `json:"unit"`
-}
-
-type Recipe struct {
-	ID           int64        `json:"id"`
-	Name         string       `json:"name"`
-	Description  string       `json:"description"`
-	Instructions []string     `json:"instructions"`
-	Ingredients  []Ingredient `json:"ingredients"`
-	Tags         []string     `json:"tags"`
-	Source       string       `json:"source"`
-}
 
 func main() {
 	c := make(chan os.Signal, 1)
@@ -37,18 +23,18 @@ func main() {
 	}()
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /", Home)
-	mux.HandleFunc("GET /recipes", Recipes)
-	mux.HandleFunc("GET /recipes/{id}", RecipeDetail)
-	mux.HandleFunc("GET /tags", Tags)
-	mux.HandleFunc("GET /tags/{tag}", RecipesByTag)
-	mux.HandleFunc("GET /test", Test)
+	mux.HandleFunc("GET /", api.Home)
+	mux.HandleFunc("GET /recipes", api.Recipes)
+	mux.HandleFunc("GET /recipes/{id}", api.RecipeDetail)
+	mux.HandleFunc("GET /tags", api.Tags)
+	mux.HandleFunc("GET /tags/{tag}", api.RecipesByTag)
+	mux.HandleFunc("GET /test", api.Test)
 
 	fs := http.FileServer(http.Dir("./css"))
 	mux.Handle("GET /css/", http.StripPrefix("/css", fs))
 
 	log.Println("Connecting...")
-	Connect()
+	db.Connect()
 	log.Println("Connected to Database")
 
 	populateTestData()
@@ -57,17 +43,22 @@ func main() {
 }
 
 func populateTestData() {
-	_, err := AddTestGrilledCheeseRecipe()
+	_, err := db.AddTestGrilledCheeseRecipe()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	_, err = AddTestChocolateMilkshakeRecipe()
+	_, err = db.AddTestChocolateMilkshakeRecipe()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	_, err = AddTestFreshGuacamoleRecipe()
+	_, err = db.AddTestFreshGuacamoleRecipe()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.AddTestGarlicLimeChicken()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -76,11 +67,11 @@ func populateTestData() {
 func cleanup() {
 	log.Println("\nReceived Interrupt Event")
 	log.Println("Test data cleanup (wiping database)")
-	WipeDatabase()
-	Disconnect()
+	db.WipeDatabase()
+	db.Disconnect()
 }
 
-func printRecipe(rec Recipe) {
+func printRecipe(rec db.Recipe) {
 	fmt.Printf("Recipe Name:\n\t%v\n", rec.Name)
 	fmt.Printf("Description:\n\t%v\n", rec.Description)
 	fmt.Printf("Ingredients:\n")

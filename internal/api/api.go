@@ -1,12 +1,14 @@
-package main
+package api
 
 import (
 	"net/http"
+
+	"github.com/rxdps93/home-recipes/internal/pages"
 )
 
 func Home(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
-		content := GenerateHomeHTML()
+		content := pages.GenerateHomeHTML()
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(content))
@@ -17,7 +19,7 @@ func Home(w http.ResponseWriter, req *http.Request) {
 
 func Recipes(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
-		content := GenerateRecipesHTML()
+		content := pages.GenerateRecipesHTML()
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(content))
@@ -29,7 +31,7 @@ func Recipes(w http.ResponseWriter, req *http.Request) {
 func RecipeDetail(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
 		id := req.PathValue("id")
-		content := GenerateRecipeDetailHTML(id)
+		content := pages.GenerateRecipeDetailHTML(id)
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(content))
@@ -40,7 +42,7 @@ func RecipeDetail(w http.ResponseWriter, req *http.Request) {
 
 func Tags(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
-		content := GenerateTagsHTML()
+		content := pages.GenerateTagsHTML()
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(content))
@@ -52,7 +54,7 @@ func Tags(w http.ResponseWriter, req *http.Request) {
 func RecipesByTag(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
 		tag := req.PathValue("tag")
-		content := GenerateRecipesByTagHTML(tag)
+		content := pages.GenerateRecipesByTagHTML(tag)
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(content))
@@ -63,7 +65,7 @@ func RecipesByTag(w http.ResponseWriter, req *http.Request) {
 
 func Test(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
-		content := GenerateTestHTML()
+		content := pages.GenerateTestHTML()
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(content))
