@@ -52,12 +52,14 @@ main h1 {
     letter-spacing: 0.25rem;
 }
 
-nav a {
-	text-decoration: none;
+nav li {
+    display: inline-block;
 	color: white;
 }
 
-nav li {
+nav a {
+    text-decoration: none;
+    color: white;
 	display: inline-block;
 	list-style: none;
 	border: dashed 1px var(--border-color);
@@ -72,7 +74,7 @@ nav ul {
 	margin: 0.5em;
 }
 
-nav a:hover li {
+nav a:hover {
 	background: white;
 	color: #010;
 	box-shadow: 2px 2px orange;
@@ -240,6 +242,10 @@ h3 {
 		text-decoration: underline;
 		margin-top: 0.5em;
 	}
+
+    nav a {
+        display: block;
+    }
 
 	nav li {
 		display: block;

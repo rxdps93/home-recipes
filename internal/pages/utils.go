@@ -25,17 +25,17 @@ func GenerateBodyStructure(headerText string, mainContent ...elem.Node) elem.Nod
 }
 
 // TODO: consider moving tags to be within the recipes section
-// TODO: swap A and Li to be valid html
 func GenerateNavigationHTML() elem.Node {
 	return elem.Nav(nil,
 		elem.Ul(nil,
-			elem.A(attrs.Props{attrs.Href: "/"}, elem.Li(nil, elem.Text("Home"))),
-			elem.A(attrs.Props{attrs.Href: "/recipes"}, elem.Li(nil, elem.Text("Recipes"))),
-			elem.A(attrs.Props{attrs.Href: "/tags"}, elem.Li(nil, elem.Text("Tags"))),
+			elem.Li(nil, elem.A(attrs.Props{attrs.Href: "/"}, elem.Text("Home"))),
+			elem.Li(nil, elem.A(attrs.Props{attrs.Href: "/recipes"}, elem.Text("Recipes"))),
+			elem.Li(nil, elem.A(attrs.Props{attrs.Href: "/tags"}, elem.Text("Tags"))),
 		),
 	)
 }
 
+// TODO: revisit this in the future
 func GenerateErrorNode(err error, msg string) elem.Node {
 	return elem.Body(nil,
 		GenerateNavigationHTML(),
