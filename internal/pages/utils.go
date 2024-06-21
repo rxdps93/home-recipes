@@ -45,3 +45,39 @@ func GenerateErrorNode(err error, msg string) elem.Node {
 		elem.P(nil, elem.Text(err.Error())),
 	)
 }
+
+func GenerateJumpLinks(ltrs []rune) elem.Node {
+	content := elem.Div(attrs.Props{attrs.Class: "jump-link"},
+		elem.Hr(nil),
+		elem.H3(nil, elem.Text("Jump to Section...")),
+	)
+
+	for i, ltr := range ltrs {
+		content.Children = append(content.Children,
+			elem.A(attrs.Props{attrs.Href: "#" + string(ltr)}, elem.Text(string(ltr))),
+		)
+
+		if i != len(ltrs)-1 {
+			content.Children = append(content.Children, elem.Text("&middot;"))
+		} else {
+			content.Children = append(content.Children, elem.Hr(nil))
+		}
+	}
+
+	return content
+}
+
+func GenerateJumpDestinations(ltrs []rune, sections map[rune][]elem.Node) elem.Node {
+	content := elem.Div(attrs.Props{attrs.Class: "jump-dest"})
+
+	for _, ltr := range ltrs {
+		content.Children = append(content.Children,
+			elem.Div(attrs.Props{attrs.Class: "jump-sec", attrs.ID: string(ltr)},
+				elem.H3(nil, elem.Text(string(ltr))),
+				elem.Ul(nil, sections[ltr]...),
+			),
+		)
+	}
+
+	return content
+}

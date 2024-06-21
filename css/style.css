@@ -90,33 +90,33 @@ h3 {
 	color: #ccc;
 }
 
-/* BEGIN RECIPE LINKS */
-.rec-jump {
+/* BEGIN JUMP LINK STYLING */
+.jump-link {
     text-align: center;
 }
 
-.rec-jump a {
+.jump-link a {
     color: white;
     font-size: large;
     padding: 0.25em;
 }
 
-.rec-jump hr {
+.jump-link hr {
     width: 75%;
     border: dashed 1px #ccc;
 }
-/* END RECIPE JUMP */
+/* END JUMP LINK */
 
-/* BEGIN RECIPE LINKS */
-.rec-links {
+/* BEGIN JUMP DESTINATION STYLING */
+.jump-dest {
     margin-bottom: 2.5em;
 }
 
-.rec-links ul {
+.jump-dest ul {
     list-style-type: none;
 }
 
-.rec-links a {
+.jump-dest a {
     display: inline-block;
     font-size: large;
     text-decoration: none;
@@ -128,13 +128,13 @@ h3 {
     margin: 0.1em;
 }
 
-.rec-links a:hover {
+.jump-dest a:hover {
     background: white;
     color: #010;
     box-shadow: 2px 2px orange;
 }
 
-/* END RECIPE LINKS */
+/* END JUMP DESTINATION */
 
 /* BEGIN RECIPE DETAIL */
 .rec-desc p {

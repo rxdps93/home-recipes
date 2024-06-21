@@ -9,7 +9,6 @@ import (
 	"github.com/rxdps93/home-recipes/internal/db"
 )
 
-// TODO: update html structure & styling
 func GenerateTagsHTML() string {
 	head := GenerateHeadNode("Tags", "View All Tags")
 
@@ -19,22 +18,30 @@ func GenerateTagsHTML() string {
 		html := elem.Html(nil, head, body)
 		return html.Render()
 	}
-	sort.Slice(tags, func(i, j int) bool {
-		return tags[i] < tags[j]
+
+	sections := make(map[rune][]elem.Node)
+	for _, tag := range tags {
+		sections[rune(tag[0])] = append(sections[rune(tag[0])],
+			elem.Li(nil,
+				elem.A(attrs.Props{attrs.Href: fmt.Sprintf("/tags/%v", tag)},
+					elem.Text(tag),
+				),
+			),
+		)
+	}
+
+	ltrs := make([]rune, 0)
+	for k := range sections {
+		ltrs = append(ltrs, k)
+	}
+	sort.Slice(ltrs, func(i, j int) bool {
+		return ltrs[i] < ltrs[j]
 	})
 
-	body := elem.Body(nil,
-		GenerateNavigationHTML(),
-		elem.H2(nil, elem.Text("All Tags:")),
-		elem.Ul(nil,
-			elem.TransformEach(tags, func(tag string) elem.Node {
-				return elem.Li(nil,
-					elem.A(attrs.Props{attrs.Href: fmt.Sprintf("/tags/%v", tag)},
-						elem.Text(tag),
-					),
-				)
-			})...,
-		),
+	body := GenerateBodyStructure("Family Recipe Index",
+		elem.H1(nil, elem.Text("View All Recipe Tags")),
+		GenerateJumpLinks(ltrs),
+		GenerateJumpDestinations(ltrs, sections),
 	)
 
 	html := elem.Html(nil, head, body)
