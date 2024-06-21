@@ -30,15 +30,15 @@ func recipeJumpLinks(ltrs []rune) elem.Node {
 	return content
 }
 
-func recipeJumpDestinations(sections map[rune][]elem.Node) elem.Node {
+func recipeJumpDestinations(ltrs []rune, sections map[rune][]elem.Node) elem.Node {
 	content := elem.Div(attrs.Props{attrs.Class: "rec-links"})
 
-	for ltr, items := range sections {
+	for _, ltr := range ltrs {
 		content.Children = append(content.Children,
 			elem.Div(attrs.Props{attrs.Class: "rec-sec", attrs.ID: string(ltr)},
 				elem.H3(nil, elem.Text(string(ltr))),
 				elem.Ul(nil,
-					items...,
+					sections[ltr]...,
 				),
 			),
 		)
@@ -79,7 +79,7 @@ func GenerateRecipesHTML() string {
 	body := GenerateBodyStructure("Family Recipe Index",
 		elem.H1(nil, elem.Text("View All Recipes")),
 		recipeJumpLinks(ltrs),
-		recipeJumpDestinations(sections),
+		recipeJumpDestinations(ltrs, sections),
 	)
 
 	html := elem.Html(nil, head, body)

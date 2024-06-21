@@ -55,7 +55,7 @@ func GenerateRecipeDetailHTML(id string) string {
 	if err != nil {
 		src = elem.Text(fmt.Sprintf(rec.Source))
 	} else {
-		src = elem.A(attrs.Props{attrs.Href: rec.Source}, elem.Text(rec.Source))
+		src = elem.A(attrs.Props{attrs.Href: rec.Source}, elem.Text("Click link to visit source website"))
 	}
 
 	body := GenerateBodyStructure(rec.Name,
