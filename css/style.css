@@ -234,7 +234,7 @@ h3 {
 	}
 
 	nav::before {
-		content: "Our Pages";
+		content: "Navigation";
 		text-align: center;
 		display: block;
 		font-size: large;
