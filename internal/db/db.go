@@ -257,7 +257,7 @@ func AddTestGarlicLimeChicken() (int64, error) {
 		Tags: []string{
 			"Freezer Meals",
 			"Dinner",
-			"Family Recipe",
+			"From Website",
 		},
 		Source: "https://www.primallyinspired.com/garlic-lime-chicken-recipe-paleo/",
 	}

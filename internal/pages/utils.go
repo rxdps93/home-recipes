@@ -19,13 +19,14 @@ func GenerateBodyStructure(headerText string, mainContent ...elem.Node) elem.Nod
 	return elem.Body(nil,
 		elem.Header(nil,
 			elem.H1(nil, elem.Text(headerText))),
-		GenerateNavigationHTML(),
+		generateNavigationHTML(),
 		elem.Main(nil, mainContent...),
+		// generateFooterHTML(),
 	)
 }
 
 // TODO: consider moving tags to be within the recipes section
-func GenerateNavigationHTML() elem.Node {
+func generateNavigationHTML() elem.Node {
 	return elem.Nav(nil,
 		elem.Ul(nil,
 			elem.Li(nil, elem.A(attrs.Props{attrs.Href: "/"}, elem.Text("Home"))),
@@ -35,10 +36,16 @@ func GenerateNavigationHTML() elem.Node {
 	)
 }
 
+func generateFooterHTML() elem.Node {
+	return elem.Footer(nil,
+		elem.H3(nil, elem.Text("This is an example of a footer")),
+	)
+}
+
 // TODO: revisit this in the future
 func GenerateErrorNode(err error, msg string) elem.Node {
 	return elem.Body(nil,
-		GenerateNavigationHTML(),
+		generateNavigationHTML(),
 		elem.H1(nil,
 			elem.Text(msg),
 		),

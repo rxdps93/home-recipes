@@ -9,8 +9,9 @@ import (
 	"github.com/rxdps93/home-recipes/internal/db"
 )
 
-// TODO: update html structure & styling
 func GenerateRecipesByTagHTML(tag string) string {
+	head := GenerateHeadNode(fmt.Sprintf("Recipes By Tag: %v", tag), fmt.Sprintf("Recipes Tagged With %v", tag))
+
 	recs, err := db.GetAllRecipesForTagName(tag)
 	if err != nil {
 		head := GenerateHeadNode("Error", "Unable to load recipes")
@@ -19,27 +20,46 @@ func GenerateRecipesByTagHTML(tag string) string {
 		return html.Render()
 	}
 
-	head := GenerateHeadNode(fmt.Sprintf("Recipes By Tag: %v", tag), fmt.Sprintf("Recipes Tagged As %v", tag))
-
-	sort.Slice(recs, func(i, j int) bool {
-		return recs[i].Name < recs[j].Name
-	})
-
-	tags := elem.Ul(nil,
-		elem.TransformEach(recs, func(rec db.Recipe) elem.Node {
-			return elem.Li(nil,
+	sections := make(map[rune][]elem.Node)
+	for _, rec := range recs {
+		sections[rune(rec.Name[0])] = append(sections[rune(rec.Name[0])],
+			elem.Li(nil,
 				elem.A(attrs.Props{attrs.Href: fmt.Sprintf("/recipes/%v", rec.ID)},
 					elem.Text(rec.Name),
 				),
-			)
-		})...,
+			),
+		)
+	}
+
+	ltrs := make([]rune, 0)
+	for k := range sections {
+		ltrs = append(ltrs, k)
+	}
+	sort.Slice(ltrs, func(i, j int) bool {
+		return ltrs[i] < ltrs[j]
+	})
+
+	// tags := elem.Ul(nil,
+	// 	elem.TransformEach(recs, func(rec db.Recipe) elem.Node {
+	// return elem.Li(nil,
+	// 	elem.A(attrs.Props{attrs.Href: fmt.Sprintf("/recipes/%v", rec.ID)},
+	// 	elem.Text(rec.Name),
+	// ),
+	// 	)
+	// })...,
+	// )
+
+	body := GenerateBodyStructure("Recipes By Tag",
+		elem.H1(nil, elem.Text(fmt.Sprintf("Recipes Tagged With %v", tag))),
+		GenerateJumpLinks(ltrs),
+		GenerateJumpDestinations(ltrs, sections),
 	)
 
-	body := elem.Body(nil,
-		GenerateNavigationHTML(),
-		elem.H2(nil, elem.Text(fmt.Sprintf("Recipes Tagged As %v:", tag))),
-		tags,
-	)
+	// body := elem.Body(nil,
+	// 	GenerateNavigationHTML(),
+	// elem.H2(nil, elem.Text(fmt.Sprintf("Recipes Tagged As %v:", tag))),
+	// tags,
+	// )
 
 	html := elem.Html(nil, head, body)
 
