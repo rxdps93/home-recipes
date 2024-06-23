@@ -8,10 +8,17 @@ import (
 
 func Home(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
-		content := pages.GenerateHomeHTML()
-		w.Header().Set("Content-Type", "text/html")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(content))
+		if req.URL.Path != "/" {
+			content := pages.GenerateNotFoundHTML()
+			w.Header().Set("Content-Type", "text/html")
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte(content))
+		} else {
+			content := pages.GenerateHomeHTML()
+			w.Header().Set("Content-Type", "text/html")
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(content))
+		}
 	} else {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}

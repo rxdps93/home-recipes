@@ -24,7 +24,7 @@ func GenerateRecipesByTagHTML(tag string) string {
 	for _, rec := range recs {
 		sections[rune(rec.Name[0])] = append(sections[rune(rec.Name[0])],
 			elem.Li(nil,
-				elem.A(attrs.Props{attrs.Href: fmt.Sprintf("/recipes/%v", rec.ID)},
+				elem.A(attrs.Props{attrs.Href: fmt.Sprintf("/recipes/%v", rec.ID), attrs.Class: "link"},
 					elem.Text(rec.Name),
 				),
 			),
@@ -39,27 +39,11 @@ func GenerateRecipesByTagHTML(tag string) string {
 		return ltrs[i] < ltrs[j]
 	})
 
-	// tags := elem.Ul(nil,
-	// 	elem.TransformEach(recs, func(rec db.Recipe) elem.Node {
-	// return elem.Li(nil,
-	// 	elem.A(attrs.Props{attrs.Href: fmt.Sprintf("/recipes/%v", rec.ID)},
-	// 	elem.Text(rec.Name),
-	// ),
-	// 	)
-	// })...,
-	// )
-
 	body := GenerateBodyStructure("Recipes By Tag",
 		elem.H1(nil, elem.Text(fmt.Sprintf("Recipes Tagged With %v", tag))),
 		GenerateJumpLinks(ltrs),
 		GenerateJumpDestinations(ltrs, sections),
 	)
-
-	// body := elem.Body(nil,
-	// 	GenerateNavigationHTML(),
-	// elem.H2(nil, elem.Text(fmt.Sprintf("Recipes Tagged As %v:", tag))),
-	// tags,
-	// )
 
 	html := elem.Html(nil, head, body)
 

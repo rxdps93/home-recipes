@@ -8,7 +8,7 @@ import (
 func GenerateHeadNode(title string, description string) elem.Node {
 	return elem.Head(nil,
 		elem.Title(nil, elem.Text(title)),
-		elem.Link(attrs.Props{attrs.Rel: "stylesheet", attrs.Type: "text/css", attrs.Href: "/css/style.css"}),
+		elem.Link(attrs.Props{attrs.Rel: "stylesheet", attrs.Type: "text/css", attrs.Href: "assets/css/styles.css"}),
 		elem.Meta(attrs.Props{attrs.Charset: "utf-8"}),
 		elem.Meta(attrs.Props{attrs.Name: "description", attrs.Content: description}),
 		elem.Meta(attrs.Props{attrs.Name: "viewport", attrs.Content: "width=device-width, initial-scale=1"}),
@@ -29,13 +29,14 @@ func GenerateBodyStructure(headerText string, mainContent ...elem.Node) elem.Nod
 func generateNavigationHTML() elem.Node {
 	return elem.Nav(nil,
 		elem.Ul(nil,
-			elem.Li(nil, elem.A(attrs.Props{attrs.Href: "/"}, elem.Text("Home"))),
-			elem.Li(nil, elem.A(attrs.Props{attrs.Href: "/recipes"}, elem.Text("Recipes"))),
-			elem.Li(nil, elem.A(attrs.Props{attrs.Href: "/tags"}, elem.Text("Tags"))),
+			elem.Li(nil, elem.A(attrs.Props{attrs.Href: "/", attrs.Class: "link"}, elem.Text("Home"))),
+			elem.Li(nil, elem.A(attrs.Props{attrs.Href: "/recipes", attrs.Class: "link"}, elem.Text("Recipes"))),
+			elem.Li(nil, elem.A(attrs.Props{attrs.Href: "/tags", attrs.Class: "link"}, elem.Text("Tags"))),
 		),
 	)
 }
 
+// TODO: may not use this, just for experimenting
 func generateFooterHTML() elem.Node {
 	return elem.Footer(nil,
 		elem.H3(nil, elem.Text("This is an example of a footer")),
@@ -50,6 +51,21 @@ func GenerateErrorNode(err error, msg string) elem.Node {
 			elem.Text(msg),
 		),
 		elem.P(nil, elem.Text(err.Error())),
+	)
+}
+
+func GenerateRecipeNavLinks() elem.Node {
+	return elem.Div(attrs.Props{attrs.Class: "rec-nav"},
+		elem.H3(nil, elem.Text("Recipe Page Navigation")),
+		elem.A(attrs.Props{attrs.Href: "/recipes", attrs.Class: "link"},
+			elem.Text("All Recipes"),
+		),
+		elem.A(attrs.Props{attrs.Href: "/tags", attrs.Class: "link"},
+			elem.Text("Recipe Tags"),
+		),
+		elem.A(attrs.Props{attrs.Href: "/recipe-search", attrs.Class: "link"},
+			elem.Text("Search Recipes"),
+		),
 	)
 }
 

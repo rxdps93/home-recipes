@@ -45,6 +45,8 @@ main {
 	border: solid 2px var(--border-color);
 	padding: 1em;
 	border-radius: 10px;
+    display: flex;
+    flex-direction: column;
 }
 
 main h1 {
@@ -57,27 +59,13 @@ nav li {
 	color: white;
 }
 
-nav a {
-    text-decoration: none;
-    color: white;
-	display: inline-block;
-	list-style: none;
-	border: dashed 1px var(--border-color);
-	border-radius: 10px;
-	padding: 0.5em;
+nav .link {
 	max-width: 7em;
-	background: var(--btn-bg);
 }
 
 nav ul {
 	padding: 0;
 	margin: 0.5em;
-}
-
-nav a:hover {
-	background: white;
-	color: #010;
-	box-shadow: 2px 2px orange;
 }
 
 h1 {
@@ -91,6 +79,31 @@ h2 {
 h3 {
 	color: #ccc;
 }
+
+.rec-nav {
+    text-align: center;
+    margin-bottom: 2.5em;
+}
+
+/* LINK STYLING */
+.link {
+    display: inline-block;
+    font-size: large;
+    text-decoration: none;
+    color: white;
+    border: dashed 1px var(--border-color);
+    border-radius: 5px;
+    padding: 0.5em;
+    background: var(--btn-bg);
+    margin: 0.1em;
+}
+
+.link:hover {
+    background: white;
+    color: #010;
+    box-shadow: 2px 2px orange;
+}
+/* END LINK STYLING */
 
 /* BEGIN JUMP LINK STYLING */
 .jump-link {
@@ -117,25 +130,6 @@ h3 {
 .jump-dest ul {
     list-style-type: none;
 }
-
-.jump-dest a {
-    display: inline-block;
-    font-size: large;
-    text-decoration: none;
-    color: white;
-    border: dashed 1px var(--border-color);
-    border-radius: 5px;
-    padding: 0.5em;
-    background: var(--btn-bg);
-    margin: 0.1em;
-}
-
-.jump-dest a:hover {
-    background: white;
-    color: #010;
-    box-shadow: 2px 2px orange;
-}
-
 /* END JUMP DESTINATION */
 
 /* BEGIN RECIPE DETAIL */
@@ -243,7 +237,7 @@ h3 {
 		margin-top: 0.5em;
 	}
 
-    nav a {
+    nav .link {
         display: block;
     }
 

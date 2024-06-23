@@ -23,7 +23,7 @@ func GenerateTagsHTML() string {
 	for _, tag := range tags {
 		sections[rune(tag[0])] = append(sections[rune(tag[0])],
 			elem.Li(nil,
-				elem.A(attrs.Props{attrs.Href: fmt.Sprintf("/tags/%v", tag)},
+				elem.A(attrs.Props{attrs.Href: fmt.Sprintf("/tags/%v", tag), attrs.Class: "link"},
 					elem.Text(tag),
 				),
 			),
@@ -38,8 +38,8 @@ func GenerateTagsHTML() string {
 		return ltrs[i] < ltrs[j]
 	})
 
-	body := GenerateBodyStructure("Family Recipe Index",
-		elem.H1(nil, elem.Text("View All Recipe Tags")),
+	body := GenerateBodyStructure("View All Recipe Tags",
+		GenerateRecipeNavLinks(),
 		GenerateJumpLinks(ltrs),
 		GenerateJumpDestinations(ltrs, sections),
 	)

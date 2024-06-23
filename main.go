@@ -30,8 +30,9 @@ func main() {
 	mux.HandleFunc("GET /tags/{tag}", api.RecipesByTag)
 	mux.HandleFunc("GET /test", api.Test)
 
-	fs := http.FileServer(http.Dir("./css"))
-	mux.Handle("GET /css/", http.StripPrefix("/css", fs))
+	// TODO: CSS won't load on urls with params (recipe detail + recipe by tag)
+	fs := http.FileServer(http.Dir("./assets"))
+	mux.Handle("GET /assets/", http.StripPrefix("/assets", fs))
 
 	log.Println("Connecting...")
 	db.Connect()
