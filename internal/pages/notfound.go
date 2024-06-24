@@ -11,7 +11,7 @@ func GenerateNotFoundHTML() string {
 	body := GenerateBodyStructure("404 - Page Not Found",
 		elem.Div(attrs.Props{attrs.Style: "width: 100%"},
 			elem.Img(attrs.Props{
-				attrs.Src:   "/assets/404.gif",
+				attrs.Src:   "/assets/imgs/404.gif",
 				attrs.Alt:   "Ah, ah, ah!",
 				attrs.Style: "float: left; margin: auto; display: block;",
 			}),

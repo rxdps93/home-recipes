@@ -8,7 +8,7 @@ import (
 func GenerateHeadNode(title string, description string) elem.Node {
 	return elem.Head(nil,
 		elem.Title(nil, elem.Text(title)),
-		elem.Link(attrs.Props{attrs.Rel: "stylesheet", attrs.Type: "text/css", attrs.Href: "assets/css/styles.css"}),
+		elem.Link(attrs.Props{attrs.Rel: "stylesheet", attrs.Type: "text/css", attrs.Href: "/assets/css/styles.css"}),
 		elem.Meta(attrs.Props{attrs.Charset: "utf-8"}),
 		elem.Meta(attrs.Props{attrs.Name: "description", attrs.Content: description}),
 		elem.Meta(attrs.Props{attrs.Name: "viewport", attrs.Content: "width=device-width, initial-scale=1"}),
