@@ -159,6 +159,14 @@ h3 {
     margin-bottom: 10px;
 }
 
+/* BEGIN RECIPE SUPPLEMENTAL INFO STYLING */
+.rec-supp {
+    max-width: --var(--primary-width);
+}
+.rec-supp hr {
+    width: 75%;
+}
+
 .rec-tags a {
     display: inline-block;
     font-size: small;
@@ -215,6 +223,7 @@ h3 {
     color: #010;
     box-shadow: 2px 2px orange;
 }
+/* END RECIPE SUPPLEMENTAL STYLING */
 /* END RECIPE DETAIL */
 
 /* primary + (nav * 2) + padding */
