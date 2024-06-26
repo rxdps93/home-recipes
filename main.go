@@ -29,6 +29,7 @@ func main() {
 	mux.HandleFunc("GET /tags", api.Tags)
 	mux.HandleFunc("GET /tags/{tag}", api.RecipesByTag)
 	mux.HandleFunc("GET /recipe-search", api.RecipeSearch)
+	mux.HandleFunc("GET /table", api.RecipeTable)
 	mux.HandleFunc("GET /test", api.Test)
 
 	mux.Handle("GET /assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets"))))

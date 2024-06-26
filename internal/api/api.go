@@ -58,6 +58,18 @@ func RecipeSearch(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+// TODO: finally found a use case for HTMX :^)
+func RecipeTable(w http.ResponseWriter, req *http.Request) {
+	if req.Method == http.MethodGet {
+		content := pages.GenerateRecipeTable(nil).Render()
+		w.Header().Set("Content-Type", "text/html")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(content))
+	} else {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
 func Tags(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
 		content := pages.GenerateTagsHTML()
