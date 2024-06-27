@@ -3,7 +3,7 @@ package pages
 import "github.com/chasefleming/elem-go"
 
 func GenerateHomeHTML() string {
-	head := GenerateHeadNode("Home", "Home Description")
+	head := GenerateHeadNode("Home", "Home Description", false)
 
 	body := GenerateBodyStructure("Test Homepage",
 		elem.H2(nil, elem.Text("This website is under construction :^)")),

@@ -5,7 +5,7 @@ import (
 )
 
 func GenerateTestHTML() string {
-	head := GenerateHeadNode("CSS Test Page", "A Test Page For CSS")
+	head := GenerateHeadNode("CSS Test Page", "A Test Page For CSS", false)
 
 	body := GenerateBodyStructure("CSS Test Page",
 		elem.H1(nil, elem.Text("What does an H1 look like here?")),

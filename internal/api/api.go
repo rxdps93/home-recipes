@@ -6,7 +6,7 @@ import (
 	"github.com/rxdps93/home-recipes/internal/pages"
 )
 
-func Home(w http.ResponseWriter, req *http.Request) {
+func HomePage(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
 		if req.URL.Path != "/" {
 			content := pages.GenerateNotFoundHTML()
@@ -24,7 +24,7 @@ func Home(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func Recipes(w http.ResponseWriter, req *http.Request) {
+func RecipesPage(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
 		content := pages.GenerateRecipesHTML()
 		w.Header().Set("Content-Type", "text/html")
@@ -35,7 +35,7 @@ func Recipes(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func RecipeDetail(w http.ResponseWriter, req *http.Request) {
+func RecipeDetailPage(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
 		id := req.PathValue("id")
 		content := pages.GenerateRecipeDetailHTML(id)
@@ -47,7 +47,7 @@ func RecipeDetail(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func RecipeSearch(w http.ResponseWriter, req *http.Request) {
+func RecipeSearchPage(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
 		content := pages.GenerateRecipeSearchHTML()
 		w.Header().Set("Content-Type", "text/html")
@@ -59,9 +59,9 @@ func RecipeSearch(w http.ResponseWriter, req *http.Request) {
 }
 
 // TODO: finally found a use case for HTMX :^)
-func RecipeTable(w http.ResponseWriter, req *http.Request) {
-	if req.Method == http.MethodGet {
-		content := pages.GenerateRecipeTable(nil).Render()
+func Search(w http.ResponseWriter, req *http.Request) {
+	if req.Method == http.MethodPost {
+		content := pages.GenerateTableBody()
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(content))
@@ -70,7 +70,7 @@ func RecipeTable(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func Tags(w http.ResponseWriter, req *http.Request) {
+func TagsPage(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
 		content := pages.GenerateTagsHTML()
 		w.Header().Set("Content-Type", "text/html")
@@ -81,7 +81,7 @@ func Tags(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func RecipesByTag(w http.ResponseWriter, req *http.Request) {
+func RecipesByTagPage(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
 		tag := req.PathValue("tag")
 		content := pages.GenerateRecipesByTagHTML(tag)
@@ -93,7 +93,7 @@ func RecipesByTag(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func Test(w http.ResponseWriter, req *http.Request) {
+func TestPage(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
 		content := pages.GenerateTestHTML()
 		w.Header().Set("Content-Type", "text/html")

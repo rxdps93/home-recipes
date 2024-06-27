@@ -10,7 +10,7 @@ import (
 )
 
 func GenerateTagsHTML() string {
-	head := GenerateHeadNode("Tags", "View All Tags")
+	head := GenerateHeadNode("Tags", "View All Tags", false)
 
 	tags, err := db.GetAllTags()
 	if err != nil {

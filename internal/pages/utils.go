@@ -5,14 +5,20 @@ import (
 	"github.com/chasefleming/elem-go/attrs"
 )
 
-func GenerateHeadNode(title string, description string) elem.Node {
-	return elem.Head(nil,
+func GenerateHeadNode(title string, description string, useHTMX bool) elem.Node {
+	content := elem.Head(nil,
 		elem.Title(nil, elem.Text(title)),
 		elem.Link(attrs.Props{attrs.Rel: "stylesheet", attrs.Type: "text/css", attrs.Href: "/assets/css/styles.css"}),
 		elem.Meta(attrs.Props{attrs.Charset: "utf-8"}),
 		elem.Meta(attrs.Props{attrs.Name: "description", attrs.Content: description}),
 		elem.Meta(attrs.Props{attrs.Name: "viewport", attrs.Content: "width=device-width, initial-scale=1"}),
 	)
+
+	if useHTMX {
+		content.Children = append(content.Children, elem.Script(attrs.Props{attrs.Src: "https://unpkg.com/htmx.org@2.0.0"}))
+	}
+
+	return content
 }
 
 func GenerateBodyStructure(headerText string, mainContent ...elem.Node) elem.Node {

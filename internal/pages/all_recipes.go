@@ -10,7 +10,7 @@ import (
 )
 
 func GenerateRecipesHTML() string {
-	head := GenerateHeadNode("Recipes", "View All Recipes")
+	head := GenerateHeadNode("Recipes", "View All Recipes", false)
 
 	recs, err := db.GetAllRecipes()
 	if err != nil {

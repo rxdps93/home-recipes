@@ -23,14 +23,16 @@ func main() {
 	}()
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /", api.Home)
-	mux.HandleFunc("GET /recipes", api.Recipes)
-	mux.HandleFunc("GET /recipes/{id}", api.RecipeDetail)
-	mux.HandleFunc("GET /tags", api.Tags)
-	mux.HandleFunc("GET /tags/{tag}", api.RecipesByTag)
-	mux.HandleFunc("GET /recipe-search", api.RecipeSearch)
-	mux.HandleFunc("GET /table", api.RecipeTable)
-	mux.HandleFunc("GET /test", api.Test)
+	mux.HandleFunc("GET /", api.HomePage)
+	mux.HandleFunc("GET /recipes", api.RecipesPage)
+	mux.HandleFunc("GET /recipes/{id}", api.RecipeDetailPage)
+	mux.HandleFunc("GET /tags", api.TagsPage)
+	mux.HandleFunc("GET /tags/{tag}", api.RecipesByTagPage)
+	mux.HandleFunc("GET /recipe-search", api.RecipeSearchPage)
+
+	mux.HandleFunc("POST /search", api.Search)
+
+	mux.HandleFunc("GET /test", api.TestPage)
 
 	mux.Handle("GET /assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets"))))
 

@@ -10,11 +10,11 @@ import (
 )
 
 func GenerateRecipesByTagHTML(tag string) string {
-	head := GenerateHeadNode(fmt.Sprintf("Recipes By Tag: %v", tag), fmt.Sprintf("Recipes Tagged With %v", tag))
+	head := GenerateHeadNode(fmt.Sprintf("Recipes By Tag: %v", tag), fmt.Sprintf("Recipes Tagged With %v", tag), false)
 
 	recs, err := db.GetAllRecipesForTagName(tag)
 	if err != nil {
-		head := GenerateHeadNode("Error", "Unable to load recipes")
+		head := GenerateHeadNode("Error", "Unable to load recipes", false)
 		body := GenerateErrorNode(err, "Unable to load recipes")
 		html := elem.Html(nil, head, body)
 		return html.Render()

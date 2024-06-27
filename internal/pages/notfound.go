@@ -6,7 +6,7 @@ import (
 )
 
 func GenerateNotFoundHTML() string {
-	head := GenerateHeadNode("404 Page Not Found", "404 Page Not Found")
+	head := GenerateHeadNode("404 Page Not Found", "404 Page Not Found", false)
 
 	body := GenerateBodyStructure("404 - Page Not Found",
 		elem.Div(attrs.Props{attrs.Style: "width: 100%"},

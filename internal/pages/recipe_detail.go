@@ -13,7 +13,7 @@ import (
 func GenerateRecipeDetailHTML(id string) string {
 	recID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
-		head := GenerateHeadNode("Error", "Unable to Load Recipe")
+		head := GenerateHeadNode("Error", "Unable to Load Recipe", false)
 		body := GenerateErrorNode(err, "Malformed recipe ID.")
 		html := elem.Html(nil, head, body)
 		return html.Render()
@@ -21,13 +21,13 @@ func GenerateRecipeDetailHTML(id string) string {
 
 	rec, err := db.GetRecipeByID(recID)
 	if err != nil {
-		head := GenerateHeadNode("Error", "Unable to Load Recipe")
+		head := GenerateHeadNode("Error", "Unable to Load Recipe", false)
 		body := GenerateErrorNode(err, "Unable to load recipe.")
 		html := elem.Html(nil, head, body)
 		return html.Render()
 	}
 
-	head := GenerateHeadNode(rec.Name, rec.Description)
+	head := GenerateHeadNode(rec.Name, rec.Description, false)
 
 	ings := elem.Ul(nil,
 		elem.TransformEach(rec.Ingredients, func(ing db.Ingredient) elem.Node {
