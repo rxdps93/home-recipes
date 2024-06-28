@@ -1,23 +1,30 @@
 package pages
 
 import (
+	"log"
+	"strings"
+
 	"github.com/chasefleming/elem-go"
 	"github.com/chasefleming/elem-go/attrs"
 	"github.com/chasefleming/elem-go/htmx"
+	"github.com/rxdps93/home-recipes/internal/db"
 )
 
-func GenerateTableBody() string {
-	content := elem.Tr(nil,
-		elem.Td(nil, elem.Text("Recipe 1")),
-		elem.Td(nil, elem.Text("Family Recipe")),
-		elem.Td(nil, elem.Text("Cookbook")),
-	).Render()
+func GenerateTableBody(searchQuery string) string {
+	recs, err := db.GetRecipesFiltered(searchQuery)
+	if err != nil {
+		log.Printf("GenerateTableBody: %v\n", err)
+		return elem.Text("An error has occurred").Render()
+	}
 
-	content += elem.Tr(nil,
-		elem.Td(nil, elem.Text("Another Recipe")),
-		elem.Td(nil, elem.Text("Mexican")),
-		elem.Td(nil, elem.Text("based.cooking")),
-	).Render()
+	content := ""
+	for _, rec := range recs {
+		content += elem.Tr(nil,
+			elem.Td(nil, elem.Text(rec.Name)),
+			elem.Td(nil, elem.Text(strings.Join(rec.Tags, ","))),
+			elem.Td(nil, elem.Text(rec.Source)),
+		).Render()
+	}
 
 	return content
 }
@@ -27,21 +34,14 @@ func GenerateRecipeSearchHTML() string {
 
 	body := GenerateBodyStructure("Search Recipes",
 		GenerateRecipeNavLinks(),
-		elem.H3(nil,
-			elem.Span(attrs.Props{attrs.Class: "htmx-indicator"},
-				elem.Img(attrs.Props{attrs.Src: "/assets/imgs/bars.svg"}),
-				elem.Text("Searching..."),
-			),
-		),
 		elem.Input(attrs.Props{
 			attrs.Class:       "form-control",
 			attrs.Type:        "search",
 			attrs.Name:        "search",
-			attrs.Placeholder: "Begin Typing To Search Recipes...",
+			attrs.Placeholder: "Search by Recipe Name...",
 			htmx.HXPost:       "/search",
 			htmx.HXTrigger:    "input changed delay:500ms, search",
 			htmx.HXTarget:     "#search-results",
-			htmx.HXIndicator:  ".htmx-indicator",
 		}),
 
 		elem.Table(attrs.Props{attrs.Class: "table"},

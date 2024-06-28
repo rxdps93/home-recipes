@@ -9,6 +9,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// TODO: MAJOR - use mutex for all db access operations
+
 type Ingredient struct {
 	Label    string  `json:"label"`
 	Quantity float64 `json:"quantity"`
@@ -496,6 +498,37 @@ func GetAllTags() ([]string, error) {
 	}
 
 	return tags, nil
+}
+
+// TODO: allow filtering by various columns
+func GetRecipesFiltered(nameQuery string) ([]Recipe, error) {
+	var recs []Recipe
+
+	rows, err := db.Query("SELECT recipe_id FROM recipe WHERE name LIKE '%" + nameQuery + "%'")
+	if err != nil {
+		return nil, fmt.Errorf("GetRecipesFiltered: %v", err)
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, fmt.Errorf("GetRecipesFiltered: %v", err)
+		}
+
+		rec, err := GetRecipeByID(id)
+		if err != nil {
+			return nil, fmt.Errorf("GetRecipesFiltered: GetRecipeByID %q: %v", id, err)
+		}
+
+		recs = append(recs, rec)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("GetRecipesFiltered: %v", err)
+	}
+
+	return recs, nil
 }
 
 func GetAllRecipes() ([]Recipe, error) {

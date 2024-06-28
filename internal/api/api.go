@@ -58,10 +58,13 @@ func RecipeSearchPage(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-// TODO: finally found a use case for HTMX :^)
 func Search(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodPost {
-		content := pages.GenerateTableBody()
+		req.ParseForm()
+
+		sq := req.FormValue("search")
+
+		content := pages.GenerateTableBody(sq)
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(content))
