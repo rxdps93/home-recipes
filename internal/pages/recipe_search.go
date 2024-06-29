@@ -17,12 +17,13 @@ func GenerateTableBody(searchQuery string) string {
 		return elem.Text("An error has occurred").Render()
 	}
 
-	content := ""
+	var content string
 	for _, rec := range recs {
 		content += elem.Tr(nil,
-			elem.Td(nil, elem.Text(rec.Name)),
-			elem.Td(nil, elem.Text(strings.Join(rec.Tags, ","))),
-			elem.Td(nil, elem.Text(rec.Source)),
+			elem.Td(attrs.Props{attrs.Class: "sr-name"}, elem.Text(rec.Name)),
+			elem.Td(attrs.Props{attrs.Class: "sr-tags"},
+				elem.Text(strings.Join(rec.Tags, ",")),
+			),
 		).Render()
 	}
 
@@ -40,7 +41,7 @@ func GenerateRecipeSearchHTML() string {
 			attrs.Name:        "search",
 			attrs.Placeholder: "Search by Recipe Name...",
 			htmx.HXPost:       "/search",
-			htmx.HXTrigger:    "input changed delay:500ms, search",
+			htmx.HXTrigger:    "load, input changed delay:500ms, search",
 			htmx.HXTarget:     "#search-results",
 		}),
 
@@ -49,7 +50,6 @@ func GenerateRecipeSearchHTML() string {
 				elem.Tr(nil,
 					elem.Th(nil, elem.Text("Name")),
 					elem.Th(nil, elem.Text("Tags")),
-					elem.Th(nil, elem.Text("Source")),
 				),
 			),
 			elem.TBody(attrs.Props{attrs.ID: "search-results"}),
