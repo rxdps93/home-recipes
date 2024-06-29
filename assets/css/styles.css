@@ -226,6 +226,20 @@ h3 {
 /* END RECIPE SUPPLEMENTAL STYLING */
 /* END RECIPE DETAIL */
 
+/* BEGIN RECIPE SEARCH */
+
+.name-filter {
+    width: 40%;
+    margin-right: 2.5em;
+}
+
+.tag-filter {
+    width: fit-content;
+    margin-left: 10px;
+}
+
+/* END RECIPE SEARCH */
+
 /* primary + (nav * 2) + padding */
 @media (min-width: 1275px) {
 	nav {

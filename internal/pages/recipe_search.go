@@ -30,20 +30,40 @@ func GenerateTableBody(searchQuery string) string {
 	return content
 }
 
+func generateTagDropdown() elem.Node {
+	dropdown := elem.Select(attrs.Props{attrs.Name: "tags", attrs.ID: "tags", attrs.Class: "tag-filter"})
+
+	tags, err := db.GetAllTags()
+	if err != nil {
+		log.Printf("generateTagDropdown: %v\n", err)
+		return dropdown
+	}
+
+	for _, tag := range tags {
+		dropdown.Children = append(dropdown.Children, elem.Option(attrs.Props{attrs.Value: tag}, elem.Text(tag)))
+	}
+
+	return dropdown
+}
+
 func GenerateRecipeSearchHTML() string {
 	head := GenerateHeadNode("Search Recipes", "Search Recipes", true)
 
 	body := GenerateBodyStructure("Search Recipes",
 		GenerateRecipeNavLinks(),
-		elem.Input(attrs.Props{
-			attrs.Class:       "form-control",
-			attrs.Type:        "search",
-			attrs.Name:        "search",
-			attrs.Placeholder: "Search by Recipe Name...",
-			htmx.HXPost:       "/search",
-			htmx.HXTrigger:    "load, input changed delay:500ms, search",
-			htmx.HXTarget:     "#search-results",
-		}),
+		elem.Div(attrs.Props{attrs.Class: "rec-filters"},
+			elem.Input(attrs.Props{
+				attrs.Class:       "name-filter",
+				attrs.Type:        "search",
+				attrs.Name:        "search",
+				attrs.Placeholder: "Search by Recipe Name...",
+				htmx.HXPost:       "/search",
+				htmx.HXTrigger:    "load, input changed delay:500ms, search",
+				htmx.HXTarget:     "#search-results",
+			}),
+			elem.Label(nil, elem.Text("Tags")),
+			generateTagDropdown(),
+		),
 
 		elem.Table(attrs.Props{attrs.Class: "table"},
 			elem.THead(nil,
