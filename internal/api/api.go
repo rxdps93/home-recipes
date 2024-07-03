@@ -62,9 +62,10 @@ func Search(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodPost {
 		req.ParseForm()
 
-		sq := req.FormValue("search")
+		nq := req.FormValue("name")
+		tq := req.Form["tags"]
 
-		content := pages.GenerateTableBody(sq)
+		content := pages.GenerateTableBody(nq, tq)
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(content))

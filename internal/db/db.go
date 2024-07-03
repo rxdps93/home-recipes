@@ -500,20 +500,55 @@ func GetAllTags() ([]string, error) {
 	return tags, nil
 }
 
-// TODO: allow filtering by various columns
-func GetRecipesFiltered(nameQuery string) ([]Recipe, error) {
+func GetRecipesFiltered(nameQuery string, tagQuery []string) ([]Recipe, error) {
 	var recs []Recipe
 
-	rows, err := db.Query("SELECT recipe_id FROM recipe WHERE name LIKE '%" + nameQuery + "%'")
+	baseQuery := `SELECT recipe.recipe_id from recipe
+    JOIN recipe_tag on recipe_tag.recipe_id = recipe.recipe_id
+    JOIN tag on recipe_tag.tag_id = tag.tag_id
+    WHERE name like '%' || ? || '%'`
+
+	group := "\ngroup by recipe.recipe_id\n"
+	args := []any{nameQuery}
+	if len(tagQuery) == 0 {
+		baseQuery += group
+	} else {
+		tagPart := " and\ntag.label in ("
+		for _, tag := range tagQuery {
+			tagPart += "?"
+			if tag != tagQuery[len(tagQuery)-1] {
+				tagPart += ", "
+			}
+
+			args = append(args, tag)
+		}
+		tagPart += ")"
+
+		baseQuery += tagPart + group
+		baseQuery += "having count(distinct tag.label) = ?"
+
+		args = append(args, len(tagQuery))
+	}
+
+	log.Printf("baseQuery: %v", baseQuery)
+	log.Printf("arguments: %v", args)
+	log.Printf("nameQuery: %v", nameQuery)
+
+	stmt, err := db.Prepare(baseQuery)
 	if err != nil {
-		return nil, fmt.Errorf("GetRecipesFiltered: %v", err)
+		return nil, fmt.Errorf("GetRecipesFiltered prepare: %v", err)
+	}
+
+	rows, err := stmt.Query(args...)
+	if err != nil {
+		return nil, fmt.Errorf("GetRecipesFiltered query: %v", err)
 	}
 
 	defer rows.Close()
 	for rows.Next() {
 		var id int64
 		if err := rows.Scan(&id); err != nil {
-			return nil, fmt.Errorf("GetRecipesFiltered: %v", err)
+			return nil, fmt.Errorf("GetRecipesFiltered scan: %v", err)
 		}
 
 		rec, err := GetRecipeByID(id)
@@ -525,7 +560,7 @@ func GetRecipesFiltered(nameQuery string) ([]Recipe, error) {
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("GetRecipesFiltered: %v", err)
+		return nil, fmt.Errorf("GetRecipesFiltered err: %v", err)
 	}
 
 	return recs, nil
