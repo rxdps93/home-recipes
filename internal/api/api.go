@@ -107,3 +107,19 @@ func TestPage(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
 }
+
+func SearchTest(w http.ResponseWriter, req *http.Request) {
+	if req.Method == http.MethodPost {
+		req.ParseForm()
+
+		nq := req.FormValue("name")
+		tq := req.Form["tags"]
+
+		content := pages.GenerateTestTableBody(nq, tq)
+		w.Header().Set("Content-Type", "text/html")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(content))
+	} else {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}

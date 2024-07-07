@@ -530,10 +530,6 @@ func GetRecipesFiltered(nameQuery string, tagQuery []string) ([]Recipe, error) {
 		args = append(args, len(tagQuery))
 	}
 
-	log.Printf("baseQuery: %v", baseQuery)
-	log.Printf("arguments: %v", args)
-	log.Printf("nameQuery: %v", nameQuery)
-
 	stmt, err := db.Prepare(baseQuery)
 	if err != nil {
 		return nil, fmt.Errorf("GetRecipesFiltered prepare: %v", err)

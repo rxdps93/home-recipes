@@ -33,6 +33,7 @@ func main() {
 	mux.HandleFunc("POST /search", api.Search)
 
 	mux.HandleFunc("GET /test", api.TestPage)
+	mux.HandleFunc("POST /search-test", api.SearchTest)
 
 	mux.Handle("GET /assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets"))))
 

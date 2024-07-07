@@ -1,7 +1,9 @@
 package pages
 
 import (
+	"fmt"
 	"log"
+	"sort"
 
 	"github.com/chasefleming/elem-go"
 	"github.com/chasefleming/elem-go/attrs"
@@ -39,29 +41,44 @@ func GenerateTableBody(nameQuery string, tagQuery []string) string {
 	return content
 }
 
-func generateTagDropdown() elem.Node {
-	dropdown := elem.Select(attrs.Props{
-		attrs.Name:     "tags",
-		attrs.ID:       "tags",
-		attrs.Class:    "tag-filter",
-		attrs.Multiple: "true",
-		htmx.HXPost:    "/search",
-		htmx.HXTrigger: "load, change delay:500mx, tags",
-		htmx.HXTarget:  "#search-results",
-		htmx.HXInclude: "[name='name']",
-	})
-
+func generateTagFilter() elem.Node {
 	tags, err := db.GetAllTags()
 	if err != nil {
 		log.Printf("generateTagDropdown: %v\n", err)
-		return dropdown
+		return elem.Text("Unable to load tags")
 	}
+
+	sort.Strings(tags)
+
+	fieldset := elem.Fieldset(attrs.Props{
+		attrs.Name:     "tags",
+		attrs.ID:       "tags",
+		attrs.Class:    "tag-filter",
+		htmx.HXPost:    "/search",
+		htmx.HXTrigger: "load, change delay:500ms, tags",
+		htmx.HXTarget:  "#search-results",
+		htmx.HXInclude: "[name='name'],[name='tags']",
+	}, elem.Legend(nil, elem.Text("Filter By Tag")))
+
+	list := elem.Ul(attrs.Props{attrs.Class: "tag-filter-list"})
 
 	for _, tag := range tags {
-		dropdown.Children = append(dropdown.Children, elem.Option(attrs.Props{attrs.Value: tag}, elem.Text(tag)))
+		list.Children = append(list.Children, elem.Li(attrs.Props{attrs.Class: "link"},
+			elem.Input(attrs.Props{
+				attrs.Type:  "checkbox",
+				attrs.Name:  "tags",
+				attrs.ID:    fmt.Sprintf("chkbox-%v", tag),
+				attrs.Value: tag,
+			}),
+			elem.Label(attrs.Props{
+				attrs.For: fmt.Sprintf("chkbox-%v", tag),
+			}, elem.Text(tag)),
+		))
 	}
 
-	return dropdown
+	fieldset.Children = append(fieldset.Children, list)
+
+	return fieldset
 }
 
 func GenerateRecipeSearchHTML() string {
@@ -71,18 +88,20 @@ func GenerateRecipeSearchHTML() string {
 		GenerateRecipeNavLinks(),
 		elem.Div(attrs.Props{attrs.Class: "rec-search"},
 			elem.Div(attrs.Props{attrs.Class: "rec-filters"},
-				elem.Input(attrs.Props{
-					attrs.Class:       "name-filter",
-					attrs.Type:        "search",
-					attrs.Name:        "name",
-					attrs.Placeholder: "Search by Recipe Name...",
-					htmx.HXPost:       "/search",
-					htmx.HXTrigger:    "load, input changed delay:500ms, name",
-					htmx.HXTarget:     "#search-results",
-					htmx.HXInclude:    "[name='tags']",
-				}),
-				elem.Label(nil, elem.Text("Tags")),
-				generateTagDropdown(),
+				elem.Fieldset(attrs.Props{attrs.Class: "name-filter-box"},
+					elem.Legend(nil, elem.Text("Filter By Name")),
+					elem.Input(attrs.Props{
+						attrs.Class:       "name-filter",
+						attrs.Type:        "search",
+						attrs.Name:        "name",
+						attrs.Placeholder: "Search by Recipe Name...",
+						htmx.HXPost:       "/search",
+						htmx.HXTrigger:    "load, input changed delay:500ms, name",
+						htmx.HXTarget:     "#search-results",
+						htmx.HXInclude:    "[name='tags']",
+					}),
+				),
+				generateTestMultiSelect(),
 			),
 			elem.Hr(nil),
 			elem.Table(attrs.Props{attrs.Class: "rec-table"},
