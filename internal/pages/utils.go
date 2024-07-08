@@ -31,13 +31,12 @@ func GenerateBodyStructure(headerText string, mainContent ...elem.Node) elem.Nod
 	)
 }
 
-// TODO: consider moving tags to be within the recipes section
 func generateNavigationHTML() elem.Node {
 	return elem.Nav(nil,
 		elem.Ul(nil,
 			elem.Li(nil, elem.A(attrs.Props{attrs.Href: "/", attrs.Class: "link"}, elem.Text("Home"))),
 			elem.Li(nil, elem.A(attrs.Props{attrs.Href: "/recipes", attrs.Class: "link"}, elem.Text("Recipes"))),
-			elem.Li(nil, elem.A(attrs.Props{attrs.Href: "/tags", attrs.Class: "link"}, elem.Text("Tags"))),
+			elem.Li(nil, elem.A(attrs.Props{attrs.Href: "/test", attrs.Class: "link"}, elem.Text("Test Page"))),
 		),
 	)
 }

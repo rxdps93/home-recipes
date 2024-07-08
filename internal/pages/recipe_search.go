@@ -63,15 +63,17 @@ func generateTagFilter() elem.Node {
 	list := elem.Ul(attrs.Props{attrs.Class: "tag-filter-list"})
 
 	for _, tag := range tags {
-		list.Children = append(list.Children, elem.Li(attrs.Props{attrs.Class: "link"},
+		list.Children = append(list.Children, elem.Li(attrs.Props{attrs.Class: "link tag-filter-li"},
 			elem.Input(attrs.Props{
+				attrs.Class: "tag-filter-chkbox",
 				attrs.Type:  "checkbox",
 				attrs.Name:  "tags",
 				attrs.ID:    fmt.Sprintf("chkbox-%v", tag),
 				attrs.Value: tag,
 			}),
 			elem.Label(attrs.Props{
-				attrs.For: fmt.Sprintf("chkbox-%v", tag),
+				attrs.Class: "tag-filter-label",
+				attrs.For:   fmt.Sprintf("chkbox-%v", tag),
 			}, elem.Text(tag)),
 		))
 	}

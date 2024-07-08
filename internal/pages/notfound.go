@@ -19,7 +19,7 @@ func GenerateNotFoundHTML() string {
 				elem.Text("####### Ah, ah, ah! That page wasn't found! #######"),
 			),
 			elem.A(attrs.Props{attrs.Href: "/", attrs.Class: "link"},
-				elem.Text("Return Home"),
+				elem.Text("↵ Return Home"),
 			),
 		),
 	)

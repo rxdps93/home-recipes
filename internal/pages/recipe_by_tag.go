@@ -39,8 +39,8 @@ func GenerateRecipesByTagHTML(tag string) string {
 		return ltrs[i] < ltrs[j]
 	})
 
-	body := GenerateBodyStructure("Recipes By Tag",
-		elem.H1(nil, elem.Text(fmt.Sprintf("Recipes Tagged With %v", tag))),
+	body := GenerateBodyStructure(fmt.Sprintf("Recipes Tagged With %v", tag),
+		GenerateRecipeNavLinks(),
 		GenerateJumpLinks(ltrs),
 		GenerateJumpDestinations(ltrs, sections),
 	)
