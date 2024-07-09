@@ -245,6 +245,15 @@ h3 {
     margin-right: auto;
 }
 
+legend {
+    margin: 0;
+    padding-left: 5px;
+    padding-right: 5px;
+    font-weight: bold;
+    margin-left: 20px;
+    letter-spacing: 1px;
+}
+
 .name-filter {
     width: 85%;
 }
@@ -254,13 +263,6 @@ h3 {
     margin-left: auto;
     margin-right: auto;
     width: 60%;
-}
-
-.tag-filter legend {
-    margin: 0;
-    padding: 0;
-    font-weight: bold;
-    margin-left: 20px;
 }
 
 .tag-filter-list {

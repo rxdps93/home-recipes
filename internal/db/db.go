@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"sort"
 	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -779,6 +780,8 @@ func GetRecipeByID(id int64) (Recipe, error) {
 
 		rec.Tags = append(rec.Tags, tagDB.Label)
 	}
+
+	sort.Strings(rec.Tags)
 
 	return rec, nil
 }
