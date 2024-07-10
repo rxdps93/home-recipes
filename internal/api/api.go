@@ -97,6 +97,15 @@ func RecipesByTagPage(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func RecipeSubmitPage(w http.ResponseWriter, req *http.Request) {
+	if req.Method == http.MethodGet {
+		content := pages.GenerateRecipeSubmitHTML()
+		w.Header().Set("Content-Type", "text/html")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(content))
+	}
+}
+
 func TestPage(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
 		content := pages.GenerateTestHTML()

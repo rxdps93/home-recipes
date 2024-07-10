@@ -29,6 +29,7 @@ func main() {
 	mux.HandleFunc("GET /tags", api.TagsPage)
 	mux.HandleFunc("GET /tags/{tag}", api.RecipesByTagPage)
 	mux.HandleFunc("GET /recipe-search", api.RecipeSearchPage)
+	mux.HandleFunc("GET /recipe-submit", api.RecipeSubmitPage)
 
 	mux.HandleFunc("POST /search", api.Search)
 

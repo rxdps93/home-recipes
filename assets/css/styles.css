@@ -80,10 +80,38 @@ h3 {
 	color: #ccc;
 }
 
+/* BEGIN RECIPE NAVIGATION */
+
 .rec-nav {
     text-align: center;
     margin-bottom: 2.5em;
+    margin-left: auto;
+    margin-right: auto;
 }
+
+.rec-nav a {
+    width: 10ch;
+    margin: 5px;
+}
+
+.rec-nav legend {
+    color: #ccc;
+    margin: 0;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.rec-nav fieldset {
+    border-color: #ccc;
+    border-radius: 10px;
+    padding-top: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 15px;
+    width: fit-content;
+}
+
+/* END RECIPE NAVIGATION */
 
 /* LINK STYLING */
 .link {
@@ -243,6 +271,7 @@ h3 {
     width: 60%;
     margin-left: auto;
     margin-right: auto;
+    border-radius: 5px;
 }
 
 legend {
@@ -263,6 +292,7 @@ legend {
     margin-left: auto;
     margin-right: auto;
     width: 60%;
+    border-radius: 5px;
 }
 
 .tag-filter-list {
@@ -303,6 +333,20 @@ legend {
 }
 
 /* END RECIPE SEARCH */
+
+/* BEGIN RECIPE SUBMIT */
+
+.rs-instr {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.rs-instr ol {
+    text-align: left;
+}
+
+/* END RECIPE SUBMIT */
 
 /* primary + (nav * 2) + padding */
 @media (min-width: 1275px) {
