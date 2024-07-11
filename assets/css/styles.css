@@ -337,13 +337,36 @@ legend {
 /* BEGIN RECIPE SUBMIT */
 
 .rs-instr {
+    border: dashed 1px var(--border-color);
+    border-radius: 5px;
+    padding: 0.5em;
+    margin: 0.1em;
     text-align: center;
     margin-left: auto;
     margin-right: auto;
 }
 
+.rs-instr summary {
+    color: orange;
+    border-radius: 5px;
+    padding: 0.5em;
+    margin: 0.1em;
+    letter-spacing: 1px;
+    font-variant: small-caps;
+    font-size: large;
+}
+
+.rs-instr summary:hover {
+    background: white;
+    color: #010;
+}
+
 .rs-instr ol {
     text-align: left;
+}
+
+.rs-instr li {
+    margin: 10px 0;
 }
 
 /* END RECIPE SUBMIT */
