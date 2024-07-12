@@ -32,6 +32,7 @@ func main() {
 	mux.HandleFunc("GET /recipe-submit", api.RecipeSubmitPage)
 
 	mux.HandleFunc("POST /search", api.Search)
+	mux.HandleFunc("POST /submit", api.Submit)
 
 	mux.HandleFunc("GET /test", api.TestPage)
 	mux.HandleFunc("POST /search-test", api.SearchTest)

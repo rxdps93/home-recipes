@@ -1,10 +1,14 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
+	"github.com/chasefleming/elem-go"
 	"github.com/rxdps93/home-recipes/internal/pages"
 )
+
+// TODO: better handling of 'method not allowed' scenarios
 
 func HomePage(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
@@ -68,6 +72,22 @@ func Search(w http.ResponseWriter, req *http.Request) {
 		content := pages.GenerateTableBody(nq, tq)
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(content))
+	} else {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+// TODO: this
+func Submit(w http.ResponseWriter, req *http.Request) {
+	if req.Method == http.MethodPost {
+		req.ParseForm()
+
+		rn := req.FormValue("rec-name")
+		content := elem.Text(fmt.Sprintf("you submitted %v as the name", rn))
+
+		w.Header().Set("Content-Type", "text/html")
+		w.WriteHeader(http.StatusOK) // TODO: set this based on submission results
 		w.Write([]byte(content))
 	} else {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

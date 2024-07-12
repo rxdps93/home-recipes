@@ -5,6 +5,15 @@ import (
 	"github.com/chasefleming/elem-go/attrs"
 )
 
+func generateSubmissionForm() elem.Node {
+	return elem.Form(attrs.Props{attrs.Class: "rs-form", attrs.Action: "/submit", attrs.Method: "post"},
+		elem.Label(attrs.Props{attrs.For: "rec-name"}, elem.Text("Recipe Name")),
+		elem.Input(attrs.Props{attrs.Type: "text", attrs.ID: "rec-name", attrs.Name: "rec-name"}),
+		elem.Input(attrs.Props{attrs.Type: "submit", attrs.Value: "Submit"}),
+	)
+}
+
+// TODO: fix mobile rendering
 func generateSubmissionInstructions() elem.Node {
 	return elem.Details(attrs.Props{attrs.Class: "rs-instr"},
 		elem.Summary(nil, elem.Text("Instructions for Submission")),
@@ -63,6 +72,7 @@ func GenerateRecipeSubmitHTML() string {
 	body := GenerateBodyStructure("Submit a Recipe",
 		GenerateRecipeNavLinks(),
 		generateSubmissionInstructions(),
+		generateSubmissionForm(),
 	)
 
 	return elem.Html(nil, head, body).Render()

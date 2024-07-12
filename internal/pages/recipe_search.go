@@ -83,6 +83,7 @@ func generateTagFilter() elem.Node {
 	return fieldset
 }
 
+// TODO: fix mobile rendering
 func GenerateRecipeSearchHTML() string {
 	head := GenerateHeadNode("Search Recipes", "Search Recipes", true)
 
