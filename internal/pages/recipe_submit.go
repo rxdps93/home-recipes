@@ -7,13 +7,47 @@ import (
 
 func generateSubmissionForm() elem.Node {
 	return elem.Form(attrs.Props{attrs.Class: "rs-form", attrs.Action: "/submit", attrs.Method: "post"},
-		elem.Label(attrs.Props{attrs.For: "rec-name"}, elem.Text("Recipe Name")),
-		elem.Input(attrs.Props{attrs.Type: "text", attrs.ID: "rec-name", attrs.Name: "rec-name"}),
+		elem.Div(attrs.Props{attrs.Class: "name-submit"},
+			elem.P(nil,
+				elem.Label(attrs.Props{attrs.For: "rec-name"}, elem.Text("Recipe Name")),
+				elem.Input(attrs.Props{attrs.Type: "text", attrs.ID: "rec-name", attrs.Name: "name"}),
+			),
+		),
+		elem.Div(attrs.Props{attrs.Class: "desc-submit"},
+			elem.P(nil,
+				elem.Label(attrs.Props{attrs.For: "rec-desc"}, elem.Text("Recipe Description")),
+				elem.Input(attrs.Props{attrs.Type: "text", attrs.ID: "rec-desc", attrs.Name: "description"}),
+			),
+		),
+		// TODO: htmx to dynamically add fields; also grouping data?
+		elem.Div(attrs.Props{attrs.Class: "ing-submit"},
+			elem.H3(nil, elem.Text("Recipe Ingredients")),
+			elem.Fieldset(attrs.Props{attrs.Class: "ing-grp"},
+				elem.Input(attrs.Props{
+					attrs.Type:        "number",
+					attrs.Name:        "quantity",
+					attrs.Min:         "0",
+					attrs.Step:        "0.01",
+					attrs.Placeholder: "Quantity",
+				}),
+				elem.Input(attrs.Props{
+					attrs.Type:        "text",
+					attrs.Name:        "unit",
+					attrs.Placeholder: "Unit",
+				}),
+				elem.Input(attrs.Props{
+					attrs.Type:        "text",
+					attrs.Name:        "ingredient",
+					attrs.Placeholder: "Ingredient",
+				}),
+			),
+			elem.Div(attrs.Props{attrs.Class: "new-ing", attrs.Style: "display: none;"}),
+		),
 		elem.Input(attrs.Props{attrs.Type: "submit", attrs.Value: "Submit"}),
 	)
 }
 
-// TODO: fix mobile rendering
+// TODO: fix mobile rendering via css
 func generateSubmissionInstructions() elem.Node {
 	return elem.Details(attrs.Props{attrs.Class: "rs-instr"},
 		elem.Summary(nil, elem.Text("Instructions for Submission")),

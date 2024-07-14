@@ -83,8 +83,13 @@ func Submit(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodPost {
 		req.ParseForm()
 
-		rn := req.FormValue("rec-name")
-		content := elem.Text(fmt.Sprintf("you submitted %v as the name", rn))
+		name := req.FormValue("name")
+		desc := req.FormValue("description")
+
+		content := elem.Div(nil,
+			elem.P(nil, elem.Text(fmt.Sprintf("Name: %v", name))),
+			elem.P(nil, elem.Text(fmt.Sprintf("Description: %v", desc))),
+		).Render()
 
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusOK) // TODO: set this based on submission results
